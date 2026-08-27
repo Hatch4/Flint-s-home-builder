@@ -1,25 +1,24 @@
 // placement.js
 class Placement {
-    static attemptPlacement(grid, x, y, itemName) {
-        const item = Items[itemName];
-        if (!item) return false;
+   static attemptPlacement(grid, x, y, item) {
+    if (!item) return false;
 
-        // Validate placement based on item type
-        if (!this.validate(grid, x, y, item)) {
-            this.triggerWiggle(x, y);
-            return false;
-        }
-
-        // Place item
-        this.place(grid, x, y, item);
-
-        // Check build requirements
-        if (window.game && window.game.requirements) {
-            window.game.requirements.update();
-        }
-
-        return true;
+    // Validate placement based on item type
+    if (!this.validate(grid, x, y, item)) {
+        this.triggerWiggle(x, y);
+        return false;
     }
+
+    // Place item
+    this.place(grid, x, y, item);
+
+    // Check build requirements
+    if (window.game && window.game.requirements) {
+        window.game.requirements.update();
+    }
+
+    return true;
+}
 
     static validate(grid, x, y, item) {
         const tile = grid.tiles[y][x];
