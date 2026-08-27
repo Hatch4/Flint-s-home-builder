@@ -28,20 +28,24 @@ class Input {
     }
 
     onTouchStart(e) {
-        e.preventDefault();
-        const t = this.getTouch(e);
+    e.preventDefault();
+    const t = this.getTouch(e);
 
-        this.activeTouchId = t.id;
+    this.activeTouchId = t.id;
 
-        // Start swipe detection for camera
-        this.camera.startSwipe(t.x);
+    // Start swipe detection for camera
+    this.camera.startSwipe(t.x);
 
-        // Check if user tapped a tile
-        const tile = this.getTileAt(t.x, t.y);
-        if (tile) {
-            this.grid.selectTile(tile.x, tile.y);
-            return;
-        }
+    // Check if user tapped a tile
+    const tile = this.getTileAt(t.x, t.y);
+    if (tile) {
+
+        // 🔥 DEBUG OVERLAY EVENT
+        document.dispatchEvent(new CustomEvent("tile-hover", { detail: tile }));
+
+        this.grid.selectTile(tile.x, tile.y);
+        return;
+    }
 
         // Check if user tapped an item in the tray
         const trayItem = this.checkTrayHit(t.x, t.y);
@@ -57,14 +61,22 @@ class Input {
     }
 
     onTouchMove(e) {
-        e.preventDefault();
-        const t = this.getTouch(e);
+    e.preventDefault();
+    const t = this.getTouch(e);
 
-        if (this.draggingItem) {
-            this.dragX = t.x;
-            this.dragY = t.y;
-        }
+    // Check tile under finger while moving
+    const tile = this.getTileAt(t.x, t.y);
+    if (tile) {
+
+        // 🔥 DEBUG OVERLAY EVENT
+        document.dispatchEvent(new CustomEvent("tile-hover", { detail: tile }));
     }
+
+    if (this.draggingItem) {
+        this.dragX = t.x;
+        this.dragY = t.y;
+    }
+}
 
     onTouchEnd(e) {
         e.preventDefault();
