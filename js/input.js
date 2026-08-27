@@ -124,29 +124,34 @@ class Input {
     }
 
     isoToScreen(x, y) {
-        const angle = this.camera.angle;
-        const tileWidth = 96;
-        const tileHeight = 48;
+    const angle = this.camera.angle;
+    const tileWidth = 96;
+    const tileHeight = 48;
 
-        let rx = x;
-        let ry = y;
+    let rx = x;
+    let ry = y;
 
-        if (angle === 90) {
-            rx = this.grid.height - y - 1;
-            ry = x;
-        } else if (angle === 180) {
-            rx = this.grid.width - x - 1;
-            ry = this.grid.height - y - 1;
-        } else if (angle === 270) {
-            rx = y;
-            ry = this.grid.width - x - 1;
-        }
-
-        const screenX = (rx - ry) * (tileWidth / 2) + (window.innerWidth / 2);
-        const screenY = (rx + ry) * (tileHeight / 2) + (window.innerHeight / 2) - (this.grid.height * tileHeight / 2);
-
-        return { x: screenX, y: screenY };
+    if (angle === 90) {
+        rx = this.grid.height - y - 1;
+        ry = x;
+    } else if (angle === 180) {
+        rx = this.grid.width - x - 1;
+        ry = this.grid.height - y - 1;
+    } else if (angle === 270) {
+        rx = y;
+        ry = this.grid.width - x - 1;
     }
+
+    // USE THE SAME OFFSETS AS THE RENDERER
+    const totalHeight = this.grid.height * tileHeight / 2;
+    const offsetX = window.innerWidth / 2;
+    const offsetY = window.innerHeight / 2 - totalHeight / 2;
+
+    const screenX = (rx - ry) * (tileWidth / 2) + offsetX;
+    const screenY = (rx + ry) * (tileHeight / 2) + offsetY;
+
+    return { x: screenX, y: screenY };
+}
 
     // Check if user tapped an item in the bottom tray
     checkTrayHit(x, y) {
