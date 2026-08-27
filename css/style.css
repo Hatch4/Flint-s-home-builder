@@ -1,0 +1,79 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #cfe8ff; /* soft meadow sky */
+    font-family: 'Arial', sans-serif;
+}
+
+#gameCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    touch-action: none;
+}
+
+#ui-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#top-bar {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 60px;
+    background: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    pointer-events: auto;
+}
+
+#game-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#progress-indicator {
+    font-size: 16px;
+}
+
+#flint-face {
+    height: 48px;
+}
+
+#bottom-tray {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 120px;
+    background: rgba(255,255,255,0.8);
+    display: flex;
+    overflow-x: auto;
+    pointer-events: auto;
+}
+
+#side-buttons {
+    position: absolute;
+    right: 10px;
+    top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+}
+
+#side-buttons button {
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: none;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
