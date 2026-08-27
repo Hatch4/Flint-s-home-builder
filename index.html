@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Flint Blockwood: Home for an Octopus</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Fullscreen canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI Layer -->
+    <div id="ui-layer">
+        <div id="top-bar">
+            <div id="game-title">Flint Blockwood: Home for an Octopus</div>
+            <div id="progress-indicator">0%</div>
+            <img id="flint-face" src="assets/ui/flint_default.png" alt="Flint">
+        </div>
+
+        <div id="bottom-tray"></div>
+
+        <div id="side-buttons">
+            <button id="rotate-btn">Rotate</button>
+            <button id="delete-btn">Delete</button>
+            <button id="interior-btn">Interior</button>
+        </div>
+    </div>
+
+    <!-- Modular JS Files -->
+    <script src="js/main.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/grid.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/placement.js"></script>
+    <script src="js/items.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/save.js"></script>
+    <script src="js/requirements.js"></script>
+
+</body>
+</html>
