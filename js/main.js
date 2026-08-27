@@ -9,7 +9,7 @@ window.onload = () => {
     resizeCanvas();
 
     // Core game objects
-    game.grid = new Grid(5, 4); // starting footprint 5×4
+    game.grid = new Grid(5, 4);
     game.camera = new Camera();
     game.renderer = new Renderer(ctx, game.grid, game.camera);
     game.input = new Input(canvas, game.grid, game.camera);
@@ -21,13 +21,27 @@ window.onload = () => {
     // Load previous save
     game.save.load();
 
+    // Ensure renderer knows the correct canvas size
+    if (game.renderer.updateCanvasSize) {
+        game.renderer.updateCanvasSize(canvas.width, canvas.height);
+    }
+
+    // Debug overlay
+    game.debug = new DebugOverlay(game);
+
     // Start render loop
     requestAnimationFrame(loop);
 };
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     game.renderer.draw();
+
+    if (game.debug) {
+        game.debug.draw(ctx);
+    }
+
     requestAnimationFrame(loop);
 }
 
