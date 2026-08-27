@@ -46,7 +46,7 @@ class Input {
         // Check if user tapped an item in the tray
         const trayItem = this.checkTrayHit(t.x, t.y);
         if (trayItem) {
-            this.draggingItem = trayItem;
+            this.draggingItem = Items[trayItem];
             this.dragX = t.x;
             this.dragY = t.y;
             return;
