@@ -13,6 +13,11 @@ class Input {
 
         this.tileHitCache = [];       // used for fast hit detection
 
+         // 🔥 Disable browser drag/drop so game placement works
+        this.canvas.addEventListener("dragstart", (e) => e.preventDefault());
+        this.canvas.addEventListener("drop", (e) => e.preventDefault());
+        this.canvas.addEventListener("dragover", (e) => e.preventDefault());
+        
         this.bindEvents();
     }
 
