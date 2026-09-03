@@ -1,18 +1,20 @@
 // assets.js
 window.assets = {
-    floor: null,
-    wall: null,
-    roof: null,
-    decor_mushroom: null,
-    decor_lantern: null,
+const list = {
+    floor: "assets/items/floor.png",
+    wall: "assets/items/wall.png",
+    roof: "assets/items/roof.png",
+    decor_mushroom: "assets/items/mushroom.png",
+    decor_lantern: "assets/items/lantern.png"
+};
 
     load(callback) {
         const list = {
-            floor: "assets/floor.png",
-            wall: "assets/wall.png",
-            roof: "assets/roof.png",
-            decor_mushroom: "assets/mushroom.png",
-            decor_lantern: "assets/lantern.png"
+            floor: "assets/items/floor.png",
+            wall: "assets/items/wall.png",
+            roof: "assets/items/roof.png",
+            decor_mushroom: "assets/items/mushroom.png",
+            decor_lantern: "assets/items/lantern.png"
         };
 
         let loaded = 0;
