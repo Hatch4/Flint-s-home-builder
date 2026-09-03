@@ -3,6 +3,7 @@ class UI {
     constructor() {
         this.tray = document.getElementById("itemTray");
         this.createButtons();
+        this.attachRotateButton();   // <-- correct place
     }
 
     createButtons() {
@@ -22,17 +23,18 @@ class UI {
             });
 
             this.tray.appendChild(btn);
-            
-            // ROTATE BUTTON
-const rotateBtn = document.getElementById("rotateBtn");
-if (rotateBtn) {
-    rotateBtn.addEventListener("pointerdown", () => {
-        window.input.rotateCurrentItem();
-    });
-}
-
         }
+    }
+
+    attachRotateButton() {
+        const rotateBtn = document.getElementById("rotateBtn");
+        if (!rotateBtn) return;
+
+        rotateBtn.addEventListener("pointerdown", () => {
+            window.input.rotateCurrentItem();
+        });
     }
 }
 
 window.ui = new UI();
+
