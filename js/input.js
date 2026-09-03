@@ -44,14 +44,13 @@ class Input {
         const rotateBtn = document.getElementById("rotateBtn");
         if (rotateBtn) {
             rotateBtn.addEventListener("click", () => this.rotateItem());
-            
+        }      
         const deleteBtn = document.getElementById("delete-btn");
         if (deleteBtn) {
         deleteBtn.addEventListener("click", () => {
         this.deleteMode = !this.deleteMode;
         deleteBtn.classList.toggle("active", this.deleteMode);
     });
-}
         }
     }
 
