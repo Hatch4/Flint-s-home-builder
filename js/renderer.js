@@ -92,34 +92,63 @@ class Renderer {
 
         // WALL
         if (cell.wall) {
-            const img = window.assets.wall;
-            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
-        }
+    const img = window.assets.wall;
+    if (img) {
+        this.ctx.save();
+        this.ctx.translate(pos.x, pos.y);
+        this.ctx.rotate((cell.wall.rotation || 0) * Math.PI / 180);
+        this.ctx.drawImage(img, -img.width/2, -img.height/2);
+        this.ctx.restore();
+    }
+}
 
         // ROOF
         if (cell.roof) {
-            const img = window.assets.roof;
-            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
-        }
+    const img = window.assets.roof;
+    if (img) {
+        this.ctx.save();
+        this.ctx.translate(pos.x, pos.y);
+        this.ctx.rotate((cell.roof.rotation || 0) * Math.PI / 180);
+        this.ctx.drawImage(img, -img.width/2, -img.height/2);
+        this.ctx.restore();
+    }
+}
 
         // DECOR (multiple)
         cell.decor.forEach(decorItem => {
-            const img = window.assets[decorItem.type];
-            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
-        });
+    const img = window.assets[decorItem.type];
+    if (img) {
+        this.ctx.save();
+        this.ctx.translate(pos.x, pos.y);
+        this.ctx.rotate((decorItem.rotation || 0) * Math.PI / 180);
+        this.ctx.drawImage(img, -img.width/2, -img.height/2);
+        this.ctx.restore();
+    }
+});
 
         // DOOR
         if (cell.door) {
-            const img = window.assets.door;
-            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
-        }
+    const img = window.assets.door;
+    if (img) {
+        this.ctx.save();
+        this.ctx.translate(pos.x, pos.y);
+        this.ctx.rotate((cell.door.rotation || 0) * Math.PI / 180);
+        this.ctx.drawImage(img, -img.width/2, -img.height/2);
+        this.ctx.restore();
+    }
+}
 
         // WINDOW
         if (cell.window) {
-            const img = window.assets.window;
-            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
-        }
+    const img = window.assets.window;
+    if (img) {
+        this.ctx.save();
+        this.ctx.translate(pos.x, pos.y);
+        this.ctx.rotate((cell.window.rotation || 0) * Math.PI / 180);
+        this.ctx.drawImage(img, -img.width/2, -img.height/2);
+        this.ctx.restore();
     }
+}
 
     drawGhost() {
         if (!window.input || !window.input.draggingItem) return;
@@ -138,10 +167,13 @@ class Renderer {
         if (!img) return;
 
         this.ctx.save();
+        this.ctx.translate(pos.x, pos.y);
+        this.ctx.rotate((draggingItem.rotation || 0) * Math.PI / 180);
         this.ctx.globalAlpha = 0.6;
-        this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
+        this.ctx.drawImage(img, -img.width/2, -img.height/2);
         this.ctx.globalAlpha = 1;
         this.ctx.restore();
+
     }
 
     drawSelection() {
