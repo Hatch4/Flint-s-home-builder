@@ -1,12 +1,9 @@
-// assets.js
 window.assets = {
-const list = {
-    floor: "assets/items/floor.png",
-    wall: "assets/items/wall.png",
-    roof: "assets/items/roof.png",
-    decor_mushroom: "assets/items/mushroom.png",
-    decor_lantern: "assets/items/lantern.png"
-};
+    floor: null,
+    wall: null,
+    roof: null,
+    decor_mushroom: null,
+    decor_lantern: null,
 
     load(callback) {
         const list = {
