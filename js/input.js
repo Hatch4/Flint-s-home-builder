@@ -16,43 +16,45 @@ class Input {
     }
 
     bindEvents() {
-        // DESKTOP: mouse movement
-        this.canvas.addEventListener("mousemove", (e) => this.onMouseMove(e));
+    // DESKTOP: mouse movement
+    this.canvas.addEventListener("mousemove", (e) => this.onMouseMove(e));
 
-        // DESKTOP: start dragging
-        this.canvas.addEventListener("mousedown", (e) => this.onMouseDown(e));
+    // DESKTOP: start dragging
+    this.canvas.addEventListener("mousedown", (e) => this.onMouseDown(e));
 
-        // DESKTOP: drop item
-        this.canvas.addEventListener("mouseup", (e) => this.onMouseUp(e));
+    // DESKTOP: drop item
+    this.canvas.addEventListener("mouseup", (e) => this.onMouseUp(e));
 
-        // DESKTOP: rotate with R key
-        window.addEventListener("keydown", (e) => this.onKeyDown(e));
+    // DESKTOP: rotate with R key
+    window.addEventListener("keydown", (e) => this.onKeyDown(e));
 
-        // DESKTOP: rotate with mouse wheel
-        window.addEventListener("wheel", (e) => this.onWheel(e));
+    // DESKTOP: rotate with mouse wheel
+    window.addEventListener("wheel", (e) => this.onWheel(e));
 
-        // MOBILE: touch start
-        this.canvas.addEventListener("touchstart", (e) => this.onTouchStart(e));
+    // MOBILE: touch start
+    this.canvas.addEventListener("touchstart", (e) => this.onTouchStart(e));
 
-        // MOBILE: touch move (two‑finger rotate)
-        this.canvas.addEventListener("touchmove", (e) => this.onTouchMove(e));
+    // MOBILE: touch move (two‑finger rotate)
+    this.canvas.addEventListener("touchmove", (e) => this.onTouchMove(e));
 
-        // MOBILE: touch end (tap‑and‑hold rotate)
-        this.canvas.addEventListener("touchend", (e) => this.onTouchEnd(e));
+    // MOBILE: touch end (tap‑and‑hold rotate)
+    this.canvas.addEventListener("touchend", (e) => this.onTouchEnd(e));
 
-        // MOBILE: rotate button
-        const rotateBtn = document.getElementById("rotateBtn");
-        if (rotateBtn) {
-            rotateBtn.addEventListener("click", () => this.rotateItem());
-        }      
-        const deleteBtn = document.getElementById("delete-btn");
-        if (deleteBtn) {
-        deleteBtn.addEventListener("click", () => {
-        this.deleteMode = !this.deleteMode;
-        deleteBtn.classList.toggle("active", this.deleteMode);
-    });
-        }
+    // ROTATE BUTTON (mobile + desktop)
+    const rotateBtn = document.getElementById("rotateBtn");
+    if (rotateBtn) {
+        rotateBtn.addEventListener("click", () => this.rotateItem());
     }
+
+    // DELETE BUTTON — ⭐ FIXED
+    const deleteBtn = document.getElementById("delete-btn");
+    if (deleteBtn) {
+        deleteBtn.addEventListener("click", () => {
+            this.deleteMode = !this.deleteMode;
+            deleteBtn.classList.toggle("active", this.deleteMode);
+        });
+    }
+}
 
     // -----------------------------
     // DESKTOP INPUT
