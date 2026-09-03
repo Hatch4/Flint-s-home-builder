@@ -2,73 +2,86 @@
 class UI {
     constructor(game) {
         this.game = game;
+        this.bottomTray = document.getElementById("bottom-tray");
 
-        this.rotateBtn = document.getElementById("rotate-btn");
-        this.deleteBtn = document.getElementById("delete-btn");
-        this.interiorBtn = document.getElementById("interior-btn");
-        this.tray = document.getElementById("bottom-tray");
-        this.progress = document.getElementById("progress-indicator");
+        this.dragging = false;
+        this.dragItemKey = null;
 
-        this.interiorMode = false;
-
-        this.bindButtons();
-        this.populateTray();
-        this.updateProgress();
+        this.buildTray();
     }
 
-    bindButtons() {
-        this.rotateBtn.addEventListener("click", () => {
-            this.game.camera.rotateClockwise();
-        });
+    buildTray() {
+        this.bottomTray.innerHTML = "";
 
-        this.deleteBtn.addEventListener("click", () => {
-            const sel = this.game.grid.selected;
-            if (!sel) return;
-
-            this.game.grid.clearTile(sel.x, sel.y);
-            this.game.requirements.update();
-            this.updateProgress();
-        });
-
-        this.interiorBtn.addEventListener("click", () => {
-            this.interiorMode = !this.interiorMode;
-            this.interiorBtn.style.background = this.interiorMode ? "#ffd27f" : "#fff";
-        });
-    }
-
-    populateTray() {
-        this.tray.innerHTML = "";
-
-        for (const key in this.game.items) {
-            const item = this.game.items[key];
+        for (let key in Items) {
+            const item = Items[key];
 
             const el = document.createElement("div");
-            el.className = "tray-item";
+            el.classList.add("tray-item");
             el.dataset.item = key;
-
-            el.style.width = "80px";
-            el.style.height = "80px";
-            el.style.margin = "10px";
-            el.style.borderRadius = "8px";
-            el.style.background = "#fff";
-            el.style.display = "flex";
-            el.style.alignItems = "center";
-            el.style.justifyContent = "center";
-            el.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
-            el.style.cursor = "pointer";
 
             const img = document.createElement("img");
             img.src = item.icon;
-            img.style.width = "64px";
-            img.style.height = "64px";
+            img.draggable = false;
 
             el.appendChild(img);
-            this.tray.appendChild(el);
+
+            // Enable dragging
+            el.addEventListener("pointerdown", (e) => this.startDrag(e, key));
+
+            this.bottomTray.appendChild(el);
         }
     }
 
-    updateProgress() {
-        const percent = this.game.requirements.getPercent();
-        this.progress.textContent = `${percent}%`;
+    startDrag(e, itemKey) {
+        e.preventDefault();
+
+        this.dragging = true;
+        this.dragItemKey = itemKey;
+
+        const ghost = document.getElementById("drag-ghost");
+        ghost.innerHTML = `<img src="${Items[itemKey].icon}">`;
+        ghost.style.opacity = "1";
+
+        this.updateGhostPosition(e);
+
+        window.addEventListener("pointermove", this.dragMove);
+        window.addEventListener("pointerup", this.dragEnd);
+    }
+
+    dragMove = (e) => {
+        if (!this.dragging) return;
+
+        this.updateGhostPosition(e);
+
+        this.game.input.handleDragMove(
+            e.clientX,
+            e.clientY,
+            Items[this.dragItemKey]
+        );
+    };
+
+    dragEnd = (e) => {
+        if (!this.dragging) return;
+
+        this.dragging = false;
+
+        const ghost = document.getElementById("drag-ghost");
+        ghost.style.opacity = "0";
+
+        this.game.input.handleDragEnd(
+            e.clientX,
+            e.clientY,
+            Items[this.dragItemKey]
+        );
+
+        window.removeEventListener("pointermove", this.dragMove);
+        window.removeEventListener("pointerup", this.dragEnd);
+    };
+
+    updateGhostPosition(e) {
+        const ghost = document.getElementById("drag-ghost");
+        ghost.style.left = `${e.clientX}px`;
+        ghost.style.top = `${e.clientY}px`;
     }
 }
