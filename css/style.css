@@ -31,8 +31,8 @@ html, body {
 
 /* Tray items */
 .tray-item {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     margin: 6px;
     display: inline-flex;
     justify-content: center;
@@ -58,7 +58,7 @@ html, body {
     position: absolute;
     width: 80px;
     height: 80px;
-    pointer-events: none;
+    pointer-events: none !important;
     opacity: 0;
     transform: translate(-50%, -50%);
     transition: opacity 0.15s ease-out;
@@ -106,7 +106,9 @@ html, body {
     background: rgba(255,255,255,0.8);
     display: flex;
     overflow-x: auto;
-    pointer-events: auto;
+    touch-action: pan-x; /* ⭐ Only horizontal scrolling allowed */
+    overflow-y: hidden;   /* ⭐ Prevent upward expansion */
+    align-items: center;  /* ⭐ Keep items centered */
 }
 
 .tray-item img {
