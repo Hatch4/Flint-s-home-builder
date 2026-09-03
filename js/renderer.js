@@ -28,16 +28,9 @@ class Renderer {
         this.drawGrid();
         this.drawTiles();
 
-        // Placement preview (green/red diamond)
         window.placementpreview.draw(this.ctx, this.camera);
-
-        // Dust puff animation
         window.animation.draw(this.ctx, this.camera);
-
-        // Drag ghost
         this.drawGhost();
-
-        // Selection highlight (optional)
         this.drawSelection();
     }
 
@@ -55,7 +48,6 @@ class Renderer {
                 const w = this.tileW / 2;
                 const h = this.tileH / 2;
 
-                // diamond outline
                 this.ctx.beginPath();
                 this.ctx.moveTo(pos.x, pos.y - h);
                 this.ctx.lineTo(pos.x + w, pos.y);
@@ -64,7 +56,6 @@ class Renderer {
                 this.ctx.closePath();
                 this.ctx.stroke();
 
-                // coords label
                 this.ctx.fillText(`${x},${y}`, pos.x - 12, pos.y + 4);
             }
         }
@@ -92,63 +83,65 @@ class Renderer {
 
         // WALL
         if (cell.wall) {
-    const img = window.assets.wall;
-    if (img) {
-        this.ctx.save();
-        this.ctx.translate(pos.x, pos.y);
-        this.ctx.rotate((cell.wall.rotation || 0) * Math.PI / 180);
-        this.ctx.drawImage(img, -img.width/2, -img.height/2);
-        this.ctx.restore();
-    }
-}
+            const img = window.assets.wall;
+            if (img) {
+                this.ctx.save();
+                this.ctx.translate(pos.x, pos.y);
+                this.ctx.rotate((cell.wall.rotation || 0) * Math.PI / 180);
+                this.ctx.drawImage(img, -img.width/2, -img.height/2);
+                this.ctx.restore();
+            }
+        }
 
         // ROOF
         if (cell.roof) {
-    const img = window.assets.roof;
-    if (img) {
-        this.ctx.save();
-        this.ctx.translate(pos.x, pos.y);
-        this.ctx.rotate((cell.roof.rotation || 0) * Math.PI / 180);
-        this.ctx.drawImage(img, -img.width/2, -img.height/2);
-        this.ctx.restore();
-    }
-}
+            const img = window.assets.roof;
+            if (img) {
+                this.ctx.save();
+                this.ctx.translate(pos.x, pos.y);
+                this.ctx.rotate((cell.roof.rotation || 0) * Math.PI / 180);
+                this.ctx.drawImage(img, -img.width/2, -img.height/2);
+                this.ctx.restore();
+            }
+        }
 
-        // DECOR (multiple)
+        // DECOR
         cell.decor.forEach(decorItem => {
-    const img = window.assets[decorItem.type];
-    if (img) {
-        this.ctx.save();
-        this.ctx.translate(pos.x, pos.y);
-        this.ctx.rotate((decorItem.rotation || 0) * Math.PI / 180);
-        this.ctx.drawImage(img, -img.width/2, -img.height/2);
-        this.ctx.restore();
-    }
-});
+            const img = window.assets[decorItem.type];
+            if (img) {
+                this.ctx.save();
+                this.ctx.translate(pos.x, pos.y);
+                this.ctx.rotate((decorItem.rotation || 0) * Math.PI / 180);
+                this.ctx.drawImage(img, -img.width/2, -img.height/2);
+                this.ctx.restore();
+            }
+        });
 
         // DOOR
         if (cell.door) {
-    const img = window.assets.door;
-    if (img) {
-        this.ctx.save();
-        this.ctx.translate(pos.x, pos.y);
-        this.ctx.rotate((cell.door.rotation || 0) * Math.PI / 180);
-        this.ctx.drawImage(img, -img.width/2, -img.height/2);
-        this.ctx.restore();
-    }
-}
+            const img = window.assets.door;
+            if (img) {
+                this.ctx.save();
+                this.ctx.translate(pos.x, pos.y);
+                this.ctx.rotate((cell.door.rotation || 0) * Math.PI / 180);
+                this.ctx.drawImage(img, -img.width/2, -img.height/2);
+                this.ctx.restore();
+            }
+        }
 
         // WINDOW
         if (cell.window) {
-    const img = window.assets.window;
-    if (img) {
-        this.ctx.save();
-        this.ctx.translate(pos.x, pos.y);
-        this.ctx.rotate((cell.window.rotation || 0) * Math.PI / 180);
-        this.ctx.drawImage(img, -img.width/2, -img.height/2);
-        this.ctx.restore();
-    }
-}
+            const img = window.assets.window;
+            if (img) {
+                this.ctx.save();
+                this.ctx.translate(pos.x, pos.y);
+                this.ctx.rotate((cell.window.rotation || 0) * Math.PI / 180);
+                this.ctx.drawImage(img, -img.width/2, -img.height/2);
+                this.ctx.restore();
+            }
+        }
+
+    } // ⭐ THIS closes drawTile()
 
     drawGhost() {
         if (!window.input || !window.input.draggingItem) return;
@@ -173,7 +166,6 @@ class Renderer {
         this.ctx.drawImage(img, -img.width/2, -img.height/2);
         this.ctx.globalAlpha = 1;
         this.ctx.restore();
-
     }
 
     drawSelection() {
