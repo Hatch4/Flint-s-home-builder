@@ -3,8 +3,9 @@ let canvas, ctx;
 let game = {};
 
 window.onload = () => {
-    canvas = document.getElementById("gameCanvas");
-    ctx = canvas.getContext("2d");
+    window.assets.load(() => {
+        canvas = document.getElementById("gameCanvas");
+        ctx = canvas.getContext("2d");
 
     resizeCanvas();
 
@@ -27,6 +28,7 @@ window.onload = () => {
 
     // Start render loop
     requestAnimationFrame(loop);
+    };
 };
 
 function loop() {
