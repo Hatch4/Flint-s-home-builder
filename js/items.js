@@ -7,7 +7,7 @@ const Items = {
     "stone_slab": {
         name: "Stone Slab",
         category: "floor",
-        icon: "assets/items/stone_slab.png"
+        icon: "assets/items/floor.png"
     },
 
     // -----------------------------
@@ -16,7 +16,7 @@ const Items = {
     "wood_wall": {
         name: "Wooden Wall Panel",
         category: "wall",
-        icon: "assets/items/wood_wall.png"
+        icon: "assets/items/wall.png"
     },
 
     // -----------------------------
@@ -25,7 +25,7 @@ const Items = {
     "wood_door": {
         name: "Wooden Door",
         category: "door",
-        icon: "assets/items/wood_door.png"
+        icon: "assets/items/door.png"
     },
 
     // -----------------------------
@@ -34,7 +34,7 @@ const Items = {
     "bubble_window": {
         name: "Bubble Glass Window",
         category: "window",
-        icon: "assets/items/bubble_window.png"
+        icon: "assets/items/window.png"
     },
 
     // -----------------------------
@@ -43,7 +43,7 @@ const Items = {
     "reed_roof": {
         name: "Woven Reed Roof Tile",
         category: "roof",
-        icon: "assets/items/reed_roof.png"
+        icon: "assets/items/roof.png"
     },
 
     // -----------------------------
@@ -53,7 +53,7 @@ const Items = {
         name: "Glowing Mushroom Torch",
         category: "decor",
         type: "mushroom",
-        icon: "assets/items/mushroom_torch.png"
+        icon: "assets/items/mushroom.png"
     },
 
     // -----------------------------
@@ -62,6 +62,6 @@ const Items = {
     "lantern_friendship": {
         name: "Lantern of Friendship",
         category: "lantern",
-        icon: "assets/items/lantern_friendship.png"
+        icon: "assets/items/lantern.png"
     }
 };
