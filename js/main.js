@@ -10,7 +10,7 @@ window.onload = () => {
 
     // Core game objects
     game.grid = new Grid(5, 4);
-    game.camera = new Camera();
+    game.camera = new Camera(game.grid);
     game.renderer = new Renderer(canvas, game.grid, game.camera);
     game.input = new Input(canvas, game.grid, game.camera);
     game.items = Items;
