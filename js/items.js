@@ -17,6 +17,7 @@ const Items = {
         name: "Wooden Wall Panel",
         category: "wall",
         icon: "assets/items/wall.png"
+        rotation: 0   // NEW
     },
 
     // -----------------------------
@@ -26,6 +27,7 @@ const Items = {
         name: "Wooden Door",
         category: "door",
         icon: "assets/items/door.png"
+        rotation: 0   // NEW
     },
 
     // -----------------------------
@@ -35,6 +37,7 @@ const Items = {
         name: "Bubble Glass Window",
         category: "window",
         icon: "assets/items/window.png"
+        rotation: 0   // NEW
     },
 
     // -----------------------------
@@ -44,6 +47,7 @@ const Items = {
         name: "Woven Reed Roof Tile",
         category: "roof",
         icon: "assets/items/roof.png"
+        rotation: 0   // NEW
     },
 
     // -----------------------------
@@ -54,6 +58,7 @@ const Items = {
         category: "decor",
         type: "mushroom",
         icon: "assets/items/mushroom.png"
+        rotation: 0   // NEW
     },
 
     // -----------------------------
@@ -63,5 +68,6 @@ const Items = {
         name: "Lantern of Friendship",
         category: "lantern",
         icon: "assets/items/lantern.png"
+        rotation: 0   // NEW
     }
 };
