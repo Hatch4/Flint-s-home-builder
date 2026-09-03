@@ -176,17 +176,36 @@ class Input {
     }
 
     onTouchEnd(e) {
-        if (!this.draggingItem) return;
+    if (!this.draggingItem && !this.deleteMode) return;
 
-        const duration = Date.now() - this.touchStartTime;
+    const duration = Date.now() - this.touchStartTime;
 
-        // Long press = rotate
-        if (duration > 400) {
-            this.rotateItem();
+    // Long press
+    if (duration > 400) {
+
+        // ⭐ DELETE MODE: long‑press delete
+        if (this.deleteMode) {
+            const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+            const tile = this.grid.snap(iso.x, iso.y);
+
+            if (this.grid.isValidTile(tile.x, tile.y)) {
+                this.grid.removeItem(tile.x, tile.y);
+            }
+
+            window.placementpreview.clear();
+            this.draggingItem = null;
             return;
         }
 
-        // Drop item
+        // ⭐ NORMAL MODE: long‑press rotate
+        if (this.draggingItem) {
+            this.rotateItem();
+        }
+        return;
+    }
+
+    // ⭐ Drop item (normal tap)
+    if (this.draggingItem) {
         const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
         const tile = this.grid.snap(iso.x, iso.y);
 
@@ -200,6 +219,7 @@ class Input {
         this.draggingItem = null;
         window.placementpreview.clear();
     }
+}
 
     // -----------------------------
     // SHARED ROTATION LOGIC
