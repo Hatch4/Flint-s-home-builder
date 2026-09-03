@@ -1,40 +1,46 @@
-/// PlacementRules.js
+// PlacementRules.js
 window.placementrules = {
     isValid(tileX, tileY, item) {
-        // Ensure tile is inside grid
-        if (!window.grid.isValidTile(tileX, tileY)) return false;
-
-        // Get the stack of items on this tile
-        const stack = window.grid.cells[tileY][tileX];
-
-        // Build a "cell" state from the stack
-        const cell = {
-            floor: stack.some(i => i.category === "floor"),
-            wall: stack.some(i => i.category === "wall"),
-            roof: stack.some(i => i.category === "roof"),
-            decor: stack.some(i => i.category === "decor"),
-            door: stack.some(i => i.category === "door"),
-            window: stack.some(i => i.category === "window")
-        };
+        const cell = window.grid.get(tileX, tileY);
+        if (!cell) return false;
 
         switch (item.category) {
+
+            // -------------------------------------------------
+            // FLOOR
+            // -------------------------------------------------
             case "floor":
-                return !cell.floor;
+                return cell.floor === null;
 
+            // -------------------------------------------------
+            // WALL (requires floor)
+            // -------------------------------------------------
             case "wall":
-                return cell.floor && !cell.wall;
+                return cell.floor !== null && cell.wall === null;
 
+            // -------------------------------------------------
+            // ROOF (requires wall)
+            // -------------------------------------------------
             case "roof":
-                return cell.wall && !cell.roof;
+                return cell.wall !== null && cell.roof === null;
 
+            // -------------------------------------------------
+            // DOOR (requires wall)
+            // -------------------------------------------------
+            case "door":
+                return cell.wall !== null && cell.door === null;
+
+            // -------------------------------------------------
+            // WINDOW (requires wall)
+            // -------------------------------------------------
+            case "window":
+                return cell.wall !== null && cell.window === null;
+
+            // -------------------------------------------------
+            // DECOR (always allowed)
+            // -------------------------------------------------
             case "decor":
                 return true;
-
-            case "door":
-                return cell.wall && !cell.door;
-
-            case "window":
-                return cell.wall && !cell.window;
 
             default:
                 return false;
