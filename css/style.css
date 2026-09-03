@@ -20,8 +20,13 @@ html, body {
     position: absolute;
     width: 100%;
     height: 100%;
+    pointer-events: none;   /* ⭐ Make UI layer click-through */
+    z-index: 10;
+}
+
+/* ⭐ Allow actual UI elements to still receive clicks */
+#ui-layer * {
     pointer-events: auto;
-    z-index: 10;       
 }
 
 #top-bar {
