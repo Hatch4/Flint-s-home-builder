@@ -5,6 +5,8 @@ window.assets = {
     decor_mushroom: null,
     decor_lantern: null,
 
+    deleteSound: new Audio("assets/sounds/pop.mp3"),
+
     load(callback) {
         const list = {
             floor: "assets/items/floor.png",
