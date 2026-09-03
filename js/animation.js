@@ -1,5 +1,5 @@
 // Animation.js
-window.Animation = {
+window.animation = {
     puffs: [],
 
     spawnDust(tileX, tileY) {
