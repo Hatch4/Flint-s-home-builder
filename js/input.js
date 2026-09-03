@@ -87,8 +87,13 @@ class Input {
         const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
         const tile = this.grid.snap(iso.x, iso.y);
 
-        const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
-        window.placementpreview.update(tile.x, tile.y, valid);
+        if (!tile) {
+    window.placementpreview.clear();
+    return;
+}
+
+const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+window.placementpreview.update(tile.x, tile.y, valid);
     }
 
     // ---------------------------------------------------------
@@ -129,8 +134,13 @@ class Input {
         const iso = this.camera.screenToIso(x, y);
         const tile = this.grid.snap(iso.x, iso.y);
 
-        const valid = window.placementrules.isValid(tile.x, tile.y, item);
-        window.placementpreview.update(tile.x, tile.y, valid);
+        if (!tile) {
+    window.placementpreview.clear();
+    return;
+}
+
+const valid = window.placementrules.isValid(tile.x, tile.y, item);
+window.placementpreview.update(tile.x, tile.y, valid);
     }
 
     handleDragEnd(x, y, item) {
