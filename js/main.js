@@ -19,7 +19,7 @@ window.onload = () => {
 
         game.save = new Save(game);                 // load save BEFORE requirements
         game.requirements = new Requirements(game); // requirements BEFORE UI
-        game.placementrules = new PlacementRules(game);
+        game.placementrules = new placementrules(game);
         window.placementrules = game.placementrules;
         game.ui = new UI(game);                     // UI LAST
 
