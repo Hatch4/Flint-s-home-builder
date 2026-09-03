@@ -1,7 +1,8 @@
 // camera.js
 class Camera {
-    constructor(grid) {
-        this.grid = grid;       // ⭐ store grid locally
+    constructor(grid, canvas) {
+        this.grid = grid;  
+        this.canvas = canvas;
         this.angle = 0;
         this.swipeStartX = null;
         this.swipeThreshold = 40;
