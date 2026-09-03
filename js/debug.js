@@ -16,29 +16,32 @@ class DebugOverlay {
 
         const tileWidth = 96;
         const tileHeight = 48;
+        const w = tileWidth / 2;
+        const h = tileHeight / 2;
 
         // Draw tile boundaries
         for (let y = 0; y < this.game.grid.height; y++) {
             for (let x = 0; x < this.game.grid.width; x++) {
 
-                // ⭐ FIXED: use camera instead of renderer
+                // Use camera for correct isometric projection
                 const pos = this.game.camera.isoToScreen(x, y);
 
                 ctx.strokeStyle = "rgba(0,255,0,0.4)";
                 ctx.lineWidth = 2;
 
+                // MATCH renderer.js diamond geometry EXACTLY
                 ctx.beginPath();
-                ctx.moveTo(pos.x, pos.y);
-                ctx.lineTo(pos.x + tileWidth / 2, pos.y + tileHeight / 2);
-                ctx.lineTo(pos.x, pos.y + tileHeight);
-                ctx.lineTo(pos.x - tileWidth / 2, pos.y + tileHeight / 2);
+                ctx.moveTo(pos.x, pos.y - h);
+                ctx.lineTo(pos.x + w, pos.y);
+                ctx.lineTo(pos.x, pos.y + h);
+                ctx.lineTo(pos.x - w, pos.y);
                 ctx.closePath();
                 ctx.stroke();
 
                 // Draw coordinates
                 ctx.fillStyle = "rgba(0,255,0,0.7)";
                 ctx.font = "14px Arial";
-                ctx.fillText(`${x},${y}`, pos.x - 10, pos.y + tileHeight + 16);
+                ctx.fillText(`${x},${y}`, pos.x - 10, pos.y + h + 16);
             }
         }
 
@@ -51,10 +54,10 @@ class DebugOverlay {
             ctx.lineWidth = 3;
 
             ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-            ctx.lineTo(pos.x + tileWidth / 2, pos.y + tileHeight / 2);
-            ctx.lineTo(pos.x, pos.y + tileHeight);
-            ctx.lineTo(pos.x - tileWidth / 2, pos.y + tileHeight / 2);
+            ctx.moveTo(pos.x, pos.y - h);
+            ctx.lineTo(pos.x + w, pos.y);
+            ctx.lineTo(pos.x, pos.y + h);
+            ctx.lineTo(pos.x - w, pos.y);
             ctx.closePath();
             ctx.stroke();
         }
