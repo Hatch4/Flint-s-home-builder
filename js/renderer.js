@@ -102,55 +102,33 @@ class Renderer {
 }
 
     drawWall(x, y, type) {
-        const w = this.tileWidth / 2;
-        const h = this.tileHeight / 2;
-        const height = 40;
+    const img = window.assets.wall;
+    if (!img) return;
 
-        this.ctx.save();
+    const w = this.tileWidth;
+    const h = this.tileHeight;
 
-        // simple color per type
-        let color = "#8b5a2b";
-        if (type === "door") color = "#b07b3b";
-        if (type === "window") color = "#88cfff";
-
-        // front face
-        this.ctx.fillStyle = color;
-        this.ctx.beginPath();
-        this.ctx.moveTo(x - w, y);
-        this.ctx.lineTo(x + w, y);
-        this.ctx.lineTo(x + w, y - height);
-        this.ctx.lineTo(x - w, y - height);
-        this.ctx.closePath();
-        this.ctx.fill();
-
-        this.ctx.restore();
-    }
+    // Walls sit ABOVE the tile
+    this.ctx.drawImage(img, x - w / 2, y - h - 40, w, 80);
+}
 
     drawRoof(x, y) {
-        const w = this.tileWidth / 2;
-        const h = this.tileHeight / 2;
-        const height = 30;
+    const img = window.assets.roof;
+    if (!img) return;
 
-        this.ctx.save();
-        this.ctx.fillStyle = "#d4b46a";
-        this.ctx.beginPath();
-        this.ctx.moveTo(x, y - h - height);
-        this.ctx.lineTo(x + w, y - height);
-        this.ctx.lineTo(x, y + h - height);
-        this.ctx.lineTo(x - w, y - height);
-        this.ctx.closePath();
-        this.ctx.fill();
-        this.ctx.restore();
-    }
+    const w = this.tileWidth;
+    const h = this.tileHeight;
+
+    this.ctx.drawImage(img, x - w / 2, y - h - 60, w, 60);
+}
 
     drawDecor(x, y, type) {
-        this.ctx.save();
-        this.ctx.fillStyle = type === "mushroom" ? "#ff66aa" : "#ffaa00";
-        this.ctx.beginPath();
-        this.ctx.arc(x, y - 20, 10, 0, Math.PI * 2);
-        this.ctx.fill();
-        this.ctx.restore();
-    }
+    const key = type === "mushroom" ? "decor_mushroom" : "decor_lantern";
+    const img = window.assets[key];
+    if (!img) return;
+
+    this.ctx.drawImage(img, x - 20, y - 40, 40, 40);
+}
 
     drawSelection() {
         if (!this.grid.selected) return;
