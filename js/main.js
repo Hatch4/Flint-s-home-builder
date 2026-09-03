@@ -38,6 +38,7 @@ function loop() {
 }
 
 function resizeCanvas() {
+    if (!canvas) return;   // prevents early resize crash
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
