@@ -4,12 +4,12 @@ class Camera {
         this.grid = grid;
         this.canvas = canvas;
 
-        // Camera position in screen space
-        this.x = canvas.width / 2;
-        this.y = 150;
+        // Camera position in world space
+        this.x = 300;     // good default center
+        this.y = 150;     // good default height
 
         // Zoom level
-        this.zoom = 1;
+        this.zoom = 0.35; // perfect for your Flint + grid
 
         // Tile size (must match renderer)
         this.tileW = 96;
@@ -30,6 +30,7 @@ class Camera {
     // EVENT HANDLERS
     // ---------------------------------------------------------
     attachEvents() {
+        // PAN
         this.canvas.addEventListener("pointerdown", (e) => {
             this.dragging = true;
             this.lastX = e.clientX;
@@ -53,14 +54,14 @@ class Camera {
             this.dragging = false;
         });
 
-        // Mouse wheel zoom
+        // ZOOM (mouse wheel)
         this.canvas.addEventListener("wheel", (e) => {
             const oldZoom = this.zoom;
 
             if (e.deltaY < 0) this.zoom *= 1.1;
             else this.zoom *= 0.9;
 
-            this.zoom = Math.max(0.3, Math.min(3, this.zoom));
+            this.zoom = Math.max(0.2, Math.min(3, this.zoom));
 
             // Zoom toward cursor
             const mx = e.clientX;
@@ -70,7 +71,7 @@ class Camera {
             this.y = my - (my - this.y) * (this.zoom / oldZoom);
         });
 
-        // Touch pinch zoom
+        // TOUCH PINCH ZOOM
         this.canvas.addEventListener("touchmove", (e) => {
             if (e.touches.length === 2) {
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -80,7 +81,7 @@ class Camera {
                 if (this.touchDistance !== 0) {
                     const scale = dist / this.touchDistance;
                     this.zoom *= scale;
-                    this.zoom = Math.max(0.3, Math.min(3, this.zoom));
+                    this.zoom = Math.max(0.2, Math.min(3, this.zoom));
                 }
 
                 this.touchDistance = dist;
@@ -93,26 +94,25 @@ class Camera {
     }
 
     // ---------------------------------------------------------
-    // ISO → SCREEN
+    // ISO → SCREEN (camera transform happens in renderer)
     // ---------------------------------------------------------
     isoToScreen(ix, iy) {
-    const x = (ix - iy) * (this.tileW / 2);
-    const y = (ix + iy) * (this.tileH / 2);
-
-    return { x, y };
-}
+        const x = (ix - iy) * (this.tileW / 2);
+        const y = (ix + iy) * (this.tileH / 2);
+        return { x, y };
+    }
 
     // ---------------------------------------------------------
-    // SCREEN → ISO
+    // SCREEN → ISO (convert screen → camera space)
     // ---------------------------------------------------------
     screenToIso(sx, sy) {
-    // Convert screen → camera space
-    const cx = (sx - this.x) / this.zoom;
-    const cy = (sy - this.y) / this.zoom;
+        // Convert screen → camera space
+        const cx = (sx - this.x) / this.zoom;
+        const cy = (sy - this.y) / this.zoom;
 
-    const ix = (cy / (this.tileH / 2) + cx / (this.tileW / 2)) / 2;
-    const iy = (cy / (this.tileH / 2) - cx / (this.tileW / 2)) / 2;
+        const ix = (cy / (this.tileH / 2) + cx / (this.tileW / 2)) / 2;
+        const iy = (cy / (this.tileH / 2) - cx / (this.tileW / 2)) / 2;
 
-    return { x: ix, y: iy };
+        return { x: ix, y: iy };
+    }
 }
-
