@@ -15,7 +15,7 @@ class Input {
     }
 
     bindEvents() {
-        // DESKTOP
+        // DESKTOP POINTER EVENTS
         this.canvas.addEventListener("pointerdown", (e) => this.onPointerDown(e));
         this.canvas.addEventListener("pointermove", (e) => this.onPointerMove(e));
         this.canvas.addEventListener("pointerup", (e) => this.onPointerUp(e));
@@ -58,7 +58,7 @@ class Input {
     onPointerDown(e) {
         this.updateMouse(e);
 
-        // If UI is dragging, Input should NOT start its own drag
+        // UI drag takes priority
         if (window.ui && window.ui.dragging) return;
 
         // DELETE MODE
@@ -70,6 +70,8 @@ class Input {
         // SELECT TILE
         const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
         const tile = this.grid.snap(iso.x, iso.y);
+
+        if (!tile) return;
 
         if (this.grid.isValidTile(tile.x, tile.y)) {
             this.grid.selectedTile = tile;
@@ -88,12 +90,12 @@ class Input {
         const tile = this.grid.snap(iso.x, iso.y);
 
         if (!tile) {
-    window.placementpreview.clear();
-    return;
-}
+            window.placementpreview.clear();
+            return;
+        }
 
-const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
-window.placementpreview.update(tile.x, tile.y, valid);
+        const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+        window.placementpreview.update(tile.x, tile.y, valid);
     }
 
     // ---------------------------------------------------------
@@ -103,11 +105,16 @@ window.placementpreview.update(tile.x, tile.y, valid);
         this.updateMouse(e);
 
         if (window.ui && window.ui.dragging) return;
-
         if (!this.draggingItem) return;
 
         const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
         const tile = this.grid.snap(iso.x, iso.y);
+
+        if (!tile) {
+            this.draggingItem = null;
+            window.placementpreview.clear();
+            return;
+        }
 
         const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
 
@@ -128,26 +135,25 @@ window.placementpreview.update(tile.x, tile.y, valid);
         this.mouse.x = x;
         this.mouse.y = y;
 
-        // ⭐ REQUIRED for rotation during UI drag
         this.draggingItem = item;
 
         const iso = this.camera.screenToIso(x, y);
         const tile = this.grid.snap(iso.x, iso.y);
 
         if (!tile) {
-    window.placementpreview.clear();
-    return;
-}
+            window.placementpreview.clear();
+            return;
+        }
 
-const valid = window.placementrules.isValid(tile.x, tile.y, item);
-window.placementpreview.update(tile.x, tile.y, valid);
+        const valid = window.placementrules.isValid(tile.x, tile.y, item);
+        window.placementpreview.update(tile.x, tile.y, valid);
     }
 
     handleDragEnd(x, y, item) {
         const iso = this.camera.screenToIso(x, y);
         const tile = this.grid.snap(iso.x, iso.y);
 
-        if (window.placementrules.isValid(tile.x, tile.y, item)) {
+        if (tile && window.placementrules.isValid(tile.x, tile.y, item)) {
             this.grid.saveState();
             this.grid.place(tile.x, tile.y, item);
             window.animation.spawnDust(tile.x, tile.y);
@@ -164,6 +170,7 @@ window.placementpreview.update(tile.x, tile.y, valid);
         const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
         const tile = this.grid.snap(iso.x, iso.y);
 
+        if (!tile) return;
         if (!this.grid.isValidTile(tile.x, tile.y)) return;
 
         this.grid.saveState();
@@ -179,6 +186,7 @@ window.placementpreview.update(tile.x, tile.y, valid);
         const iso = this.camera.screenToIso(e.clientX, e.clientY);
         const tile = this.grid.snap(iso.x, iso.y);
 
+        if (!tile) return;
         if (!this.grid.isValidTile(tile.x, tile.y)) return;
 
         this.grid.saveState();
@@ -244,7 +252,6 @@ window.placementpreview.update(tile.x, tile.y, valid);
 
         if (!this.draggingItem) return;
 
-        // Two‑finger rotate
         if (e.touches.length === 2) {
             this.rotateItem();
             return;
@@ -252,6 +259,11 @@ window.placementpreview.update(tile.x, tile.y, valid);
 
         const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
         const tile = this.grid.snap(iso.x, iso.y);
+
+        if (!tile) {
+            window.placementpreview.clear();
+            return;
+        }
 
         const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
         window.placementpreview.update(tile.x, tile.y, valid);
@@ -265,7 +277,7 @@ window.placementpreview.update(tile.x, tile.y, valid);
             const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
             const tile = this.grid.snap(iso.x, iso.y);
 
-            if (this.grid.isValidTile(tile.x, tile.y)) {
+            if (tile && this.grid.isValidTile(tile.x, tile.y)) {
                 this.grid.saveState();
                 this.grid.removeTopItem(tile.x, tile.y);
                 window.animation.spawnDust(tile.x, tile.y);
@@ -288,12 +300,14 @@ window.placementpreview.update(tile.x, tile.y, valid);
             const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
             const tile = this.grid.snap(iso.x, iso.y);
 
-            const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+            if (tile) {
+                const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
 
-            if (valid) {
-                this.grid.saveState();
-                this.grid.place(tile.x, tile.y, this.draggingItem);
-                window.animation.spawnDust(tile.x, tile.y);
+                if (valid) {
+                    this.grid.saveState();
+                    this.grid.place(tile.x, tile.y, this.draggingItem);
+                    window.animation.spawnDust(tile.x, tile.y);
+                }
             }
 
             this.draggingItem = null;
