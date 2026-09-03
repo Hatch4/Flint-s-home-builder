@@ -23,13 +23,45 @@ class Grid {
     }
 
     createEmptyTile() {
-        return {
-            floor: false,     // stone slab
-            wall: null,       // { type: "wall" | "door" | "window" }
-            roof: false,      // reed tile
-            decor: null,      // { type: "mushroom" | "lantern" }
-        };
+    return {
+        floor: null,      // floor item
+        wall: null,       // wall item
+        roof: null,       // roof item
+        decor: [],        // multiple decor items
+        door: null,       // door item
+        window: null      // window item
+    };
+}
+place(x, y, item) {
+    const cell = this.get(x, y);
+    if (!cell) return;
+
+    switch (item.category) {
+        case "floor":
+            cell.floor = item;
+            break;
+
+        case "wall":
+            cell.wall = item;
+            break;
+
+        case "roof":
+            cell.roof = item;
+            break;
+
+        case "decor":
+            cell.decor.push(item);
+            break;
+
+        case "door":
+            cell.door = item;
+            break;
+
+        case "window":
+            cell.window = item;
+            break;
     }
+}
 
     // Select a tile (for highlighting)
     selectTile(x, y) {
