@@ -115,6 +115,7 @@ class Input {
 
         // Delete the tile contents
         this.grid.removeTopItem(tile.x, tile.y);
+        window.animation.spawnDust(tile.x, tile.y);
 
         // Clear preview + ghost
         window.placementpreview.clear();
@@ -188,6 +189,7 @@ class Input {
 
             if (this.grid.isValidTile(tile.x, tile.y)) {
                 this.grid.removeTopItem(tile.x, tile.y);
+                window.animation.spawnDust(tile.x, tile.y);
             }
 
             window.placementpreview.clear();
