@@ -61,6 +61,10 @@ html, body {
     pointer-events: auto;
 }
 
+.tray-item img {
+    pointer-events: none;
+}
+
 #side-buttons {
     position: absolute;
     right: 10px;
