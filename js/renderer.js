@@ -31,6 +31,7 @@ class Renderer {
         window.placementpreview.draw(this.ctx, this.camera);
         window.animation.draw(this.ctx, this.camera);
         this.drawGhost();
+        this.drawDeletePreview();
         this.drawSelection();
     }
 
@@ -167,6 +168,36 @@ class Renderer {
         this.ctx.globalAlpha = 1;
         this.ctx.restore();
     }
+    drawDeletePreview() {
+    if (!window.input || !window.input.deleteMode) return;
+
+    const mouse = window.input.mouse;
+
+    // Convert mouse → iso → tile
+    const iso = this.camera.screenToIso(mouse.x, mouse.y);
+    const tile = this.grid.snap(iso.x, iso.y);
+
+    if (!this.grid.isValidTile(tile.x, tile.y)) return;
+
+    const pos = this.grid.isoToScreen(tile.x, tile.y, this.camera);
+
+    const w = this.tileW / 2;
+    const h = this.tileH / 2;
+
+    this.ctx.save();
+    this.ctx.strokeStyle = "rgba(255, 0, 0, 0.9)";
+    this.ctx.lineWidth = 3;
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(pos.x, pos.y - h);
+    this.ctx.lineTo(pos.x + w, pos.y);
+    this.ctx.lineTo(pos.x, pos.y + h);
+    this.ctx.lineTo(pos.x - w, pos.y);
+    this.ctx.closePath();
+    this.ctx.stroke();
+
+    this.ctx.restore();
+}
 
     drawSelection() {
         if (!this.grid.selectedTile) return;
