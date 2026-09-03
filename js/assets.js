@@ -6,6 +6,7 @@ window.assets = {
     decor_lantern: null,
 
     deleteSound: new Audio("assets/sounds/pop.mp3"),
+    deleteSoundVolume: 0.4,
 
     load(callback) {
         const list = {
