@@ -7,6 +7,10 @@ class UI {
         this.dragging = false;
         this.dragItemKey = null;
 
+        this.pointerStartX = 0;
+        this.pointerStartY = 0;
+        this.dragStarted = false;
+
         this.buildTray();
     }
 
@@ -26,11 +30,60 @@ class UI {
 
             el.appendChild(img);
 
-            el.addEventListener("pointerdown", (e) => this.startDrag(e, key));
+            // Use pointerdown but delay drag start until movement
+            el.addEventListener("pointerdown", (e) => this.onTrayPointerDown(e, key));
 
             this.bottomTray.appendChild(el);
         }
     }
+
+    onTrayPointerDown(e, itemKey) {
+        this.pointerStartX = e.clientX;
+        this.pointerStartY = e.clientY;
+        this.dragItemKey = itemKey;
+        this.dragStarted = false;
+
+        // Track movement globally
+        window.addEventListener("pointermove", this.onTrayPointerMove);
+        window.addEventListener("pointerup", this.onTrayPointerUp);
+    }
+
+    onTrayPointerMove = (e) => {
+        const dx = e.clientX - this.pointerStartX;
+        const dy = e.clientY - this.pointerStartY;
+
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+
+        // If mostly horizontal movement → let tray scroll, do NOT start drag
+        if (absDx > 10 && absDx > absDy) {
+            // Do nothing here: native horizontal scroll on #bottom-tray will handle it
+            return;
+        }
+
+        // If vertical movement beyond threshold → start drag
+        if (!this.dragStarted && absDy > 10 && absDy > absDx) {
+            this.startDrag(e, this.dragItemKey);
+            this.dragStarted = true;
+        }
+
+        // If drag already started, forward to dragMove
+        if (this.dragStarted) {
+            this.dragMove(e);
+        }
+    };
+
+    onTrayPointerUp = (e) => {
+        window.removeEventListener("pointermove", this.onTrayPointerMove);
+        window.removeEventListener("pointerup", this.onTrayPointerUp);
+
+        if (this.dragStarted) {
+            this.dragEnd(e);
+        }
+
+        this.dragStarted = false;
+        this.dragItemKey = null;
+    };
 
     startDrag(e, itemKey) {
         e.preventDefault();
@@ -43,9 +96,6 @@ class UI {
         ghost.style.opacity = "1";
 
         this.updateGhostPosition(e);
-
-        window.addEventListener("pointermove", this.dragMove);
-        window.addEventListener("pointerup", this.dragEnd);
     }
 
     dragMove = (e) => {
@@ -73,9 +123,6 @@ class UI {
             e.clientY,
             Items[this.dragItemKey]
         );
-
-        window.removeEventListener("pointermove", this.dragMove);
-        window.removeEventListener("pointerup", this.dragEnd);
     };
 
     updateGhostPosition(e) {
@@ -84,3 +131,4 @@ class UI {
         ghost.style.top = `${e.clientY}px`;
     }
 }
+
