@@ -1,135 +1,93 @@
-html, body {
+/* Reset */
+* {
     margin: 0;
     padding: 0;
-    overflow: hidden;
-    background: #cfe8ff; /* soft meadow sky */
-    font-family: 'Arial', sans-serif;
+    box-sizing: border-box;
 }
 
+/* Fullscreen canvas */
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #1a1a1a;
+    font-family: Arial, sans-serif;
+}
+
+/* Canvas */
 #gameCanvas {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    touch-action: none;
-    z-index: 1;        
-}
-
-/* Make UI layer click-through except for actual UI elements */
-#ui-layer {
-    position: absolute;
     width: 100%;
     height: 100%;
-    pointer-events: none !important;
-    z-index: 10;
+    touch-action: none; /* IMPORTANT for mobile gestures */
 }
 
-#ui-layer * {
-    pointer-events: auto !important;
-}
-
-/* Tray items */
-.tray-item {
-    width: 70px;
-    height: 70px;
-    margin: 6px;
-    display: inline-flex;
-    justify-content: center;
+/* Bottom item tray */
+#itemTray {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 110px;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
     align-items: center;
-    background: rgba(255,255,255,0.8);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.15s ease-out;
+    justify-content: center;
+    gap: 18px;
+    padding: 10px;
+    backdrop-filter: blur(6px);
 }
 
-.tray-item:active {
-    transform: scale(0.9);
-}
-
-.tray-item img {
-    width: 70px;
-    height: 70px;
-    pointer-events: none;
-}
-
-/* Floating ghost item */
-#drag-ghost {
-    position: absolute;
+.itemButton {
     width: 80px;
     height: 80px;
-    pointer-events: none !important;
-    opacity: 0;
-    transform: translate(-50%, -50%);
-    transition: opacity 0.15s ease-out;
-    z-index: 5;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: transform 0.15s;
 }
 
-#drag-ghost img {
+.itemButton img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    pointer-events: none;
 }
 
-#top-bar {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 60px;
-    background: rgba(255,255,255,0.7);
+.itemButton:active {
+    transform: scale(0.92);
+}
+
+/* Mobile rotate button */
+#rotateBtn {
+    position: fixed;
+    bottom: 130px;
+    right: 20px;
+    width: 70px;
+    height: 70px;
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+    font-size: 34px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-    pointer-events: auto;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    user-select: none;
+    touch-action: manipulation;
 }
 
-#game-title {
-    font-size: 18px;
-    font-weight: bold;
+#rotateBtn:active {
+    transform: scale(0.92);
 }
 
-#progress-indicator {
-    font-size: 16px;
-}
-
-#flint-face {
-    height: 48px;
-}
-
-#bottom-tray {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 120px;
-    background: rgba(255,255,255,0.8);
-    display: flex;
-    overflow-x: auto;
-    touch-action: pan-x; /* ⭐ Only horizontal scrolling allowed */
-    overflow-y: hidden;   /* ⭐ Prevent upward expansion */
-    align-items: center;  /* ⭐ Keep items centered */
-}
-
-.tray-item img {
-    pointer-events: none;
-}
-
-#side-buttons {
-    position: absolute;
-    right: 10px;
-    top: 80px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    pointer-events: auto;
-}
-
-#side-buttons button {
-    padding: 10px 14px;
-    font-size: 14px;
-    border-radius: 8px;
-    border: none;
-    background: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+/* Optional: selection highlight */
+.selectedTile {
+    outline: 3px solid red;
 }
