@@ -176,11 +176,9 @@ class Input {
     }
 
     onTouchEnd(e) {
-    if (!this.draggingItem && !this.deleteMode) return;
-
     const duration = Date.now() - this.touchStartTime;
 
-    // Long press
+    // ⭐ LONG PRESS
     if (duration > 400) {
 
         // ⭐ DELETE MODE: long‑press delete
@@ -204,7 +202,7 @@ class Input {
         return;
     }
 
-    // ⭐ Drop item (normal tap)
+    // ⭐ NORMAL TAP: place item
     if (this.draggingItem) {
         const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
         const tile = this.grid.snap(iso.x, iso.y);
