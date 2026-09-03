@@ -126,20 +126,25 @@ class Input {
     }
 
     onKeyDown(e) {
-        if (!this.draggingItem) return;
 
-        if (e.key === "r" || e.key === "R") {
-            this.rotateItem();
-        }
-        if (e.ctrlKey && e.key === "z") {
-    this.grid.undo();
-}
-
-if (e.ctrlKey && e.key === "y") {
-    this.grid.redo();
-}
-
+    // ⭐ Undo / Redo should always work
+    if (e.ctrlKey && e.key === "z") {
+        this.grid.undo();
+        return;
     }
+
+    if (e.ctrlKey && e.key === "y") {
+        this.grid.redo();
+        return;
+    }
+
+    // Rotation only works when dragging
+    if (!this.draggingItem) return;
+
+    if (e.key === "r" || e.key === "R") {
+        this.rotateItem();
+    }
+}
 
     onWheel(e) {
         if (!this.draggingItem) return;
@@ -199,10 +204,11 @@ if (e.ctrlKey && e.key === "y") {
             const tile = this.grid.snap(iso.x, iso.y);
 
             if (this.grid.isValidTile(tile.x, tile.y)) {
-                this.grid.removeTopItem(tile.x, tile.y);
-                window.animation.spawnDust(tile.x, tile.y);
-                window.assets.deleteSound?.play();
-            }
+    this.grid.saveState();   // ⭐ NEW — required for undo
+    this.grid.removeTopItem(tile.x, tile.y);
+    window.animation.spawnDust(tile.x, tile.y);
+    window.assets.deleteSound?.play();
+}
 
             window.placementpreview.clear();
             this.draggingItem = null;
