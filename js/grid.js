@@ -32,14 +32,15 @@ class Grid {
     // SNAP (NO MORE NULL)
     // ---------------------------------------------------------
     snap(x, y) {
-        const tx = Math.round(x);
-        const ty = Math.round(y);
+    const tx = Math.round(x);
+    const ty = Math.round(y);
 
-        const cx = Math.max(0, Math.min(this.width - 1, tx));
-        const cy = Math.max(0, Math.min(this.height - 1, ty));
+    // Clamp to grid bounds instead of returning null
+    const cx = Math.max(0, Math.min(this.width - 1, tx));
+    const cy = Math.max(0, Math.min(this.height - 1, ty));
 
-        return { x: cx, y: cy };
-    }
+    return { x: cx, y: cy };
+}
 
     // ---------------------------------------------------------
     // PLACE ITEM
