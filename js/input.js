@@ -5,68 +5,82 @@ class Input {
         this.grid = grid;
         this.camera = camera;
 
-        this.draggingItem = null;
         this.mouse = { x: 0, y: 0 };
+        this.draggingItem = null;
+        this.deleteMode = false;
 
         this.touchStartTime = 0;
-
-        this.deleteMode = false;   // ⭐ NEW
 
         this.bindEvents();
     }
 
     bindEvents() {
-    // DESKTOP: mouse movement
-    this.canvas.addEventListener("mousemove", (e) => this.onMouseMove(e));
+        // DESKTOP
+        this.canvas.addEventListener("pointerdown", (e) => this.onPointerDown(e));
+        this.canvas.addEventListener("pointermove", (e) => this.onPointerMove(e));
+        this.canvas.addEventListener("pointerup", (e) => this.onPointerUp(e));
 
-    // DESKTOP: start dragging
-    this.canvas.addEventListener("mousedown", (e) => this.onMouseDown(e));
+        // ROTATE BUTTON
+        const rotateBtn = document.getElementById("rotateBtn");
+        if (rotateBtn) {
+            rotateBtn.addEventListener("click", () => this.rotateItem());
+        }
 
-    // DESKTOP: drop item
-    this.canvas.addEventListener("mouseup", (e) => this.onMouseUp(e));
+        // DELETE BUTTON
+        const deleteBtn = document.getElementById("delete-btn");
+        if (deleteBtn) {
+            deleteBtn.addEventListener("click", () => {
+                this.deleteMode = !this.deleteMode;
+                deleteBtn.classList.toggle("active", this.deleteMode);
+            });
+        }
 
-    // DESKTOP: rotate with R key
-    window.addEventListener("keydown", (e) => this.onKeyDown(e));
+        // RIGHT‑CLICK DELETE
+        this.canvas.addEventListener("contextmenu", (e) => this.onRightClick(e));
 
-    // DESKTOP: rotate with mouse wheel
-    window.addEventListener("wheel", (e) => this.onWheel(e));
+        // KEYBOARD
+        window.addEventListener("keydown", (e) => this.onKeyDown(e));
 
-    // MOBILE: touch start
-    this.canvas.addEventListener("touchstart", (e) => this.onTouchStart(e));
+        // MOUSE WHEEL ROTATE
+        window.addEventListener("wheel", (e) => this.onWheel(e));
 
-    // MOBILE: touch move (two‑finger rotate)
-    this.canvas.addEventListener("touchmove", (e) => this.onTouchMove(e));
+        // MOBILE TOUCH
+        this.canvas.addEventListener("touchstart", (e) => this.onTouchStart(e));
+        this.canvas.addEventListener("touchmove", (e) => this.onTouchMove(e));
+        this.canvas.addEventListener("touchend", (e) => this.onTouchEnd(e));
 
-    // MOBILE: touch end (tap‑and‑hold rotate)
-    this.canvas.addEventListener("touchend", (e) => this.onTouchEnd(e));
-
-    // ROTATE BUTTON (mobile + desktop)
-    const rotateBtn = document.getElementById("rotateBtn");
-    if (rotateBtn) {
-        rotateBtn.addEventListener("click", () => this.rotateItem());
+        this.canvas.style.touchAction = "none";
     }
 
-    // DELETE BUTTON — ⭐ FIXED
-    const deleteBtn = document.getElementById("delete-btn");
-    if (deleteBtn) {
-        deleteBtn.addEventListener("click", () => {
-            this.deleteMode = !this.deleteMode;
-            deleteBtn.classList.toggle("active", this.deleteMode);
-        });
+    // ---------------------------------------------------------
+    // POINTER DOWN
+    // ---------------------------------------------------------
+    onPointerDown(e) {
+        this.updateMouse(e);
+
+        // If UI is dragging, Input should NOT start its own drag
+        if (window.ui && window.ui.dragging) return;
+
+        // DELETE MODE
+        if (this.deleteMode) {
+            this.deleteAtMouse();
+            return;
+        }
+
+        // SELECT TILE
+        const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+        const tile = this.grid.snap(iso.x, iso.y);
+
+        if (this.grid.isValidTile(tile.x, tile.y)) {
+            this.grid.selectedTile = tile;
+        }
     }
 
-    // DESKTOP: right‑click delete
-    this.canvas.addEventListener("contextmenu", (e) => this.onRightClick(e));
-}
-
-
-    // -----------------------------
-    // DESKTOP INPUT
-    // -----------------------------
-
-    onMouseMove(e) {
-        this.mouse.x = e.clientX;
-        this.mouse.y = e.clientY;
+    // ---------------------------------------------------------
+    // POINTER MOVE
+    // ---------------------------------------------------------
+    onPointerMove(e) {
+        this.updateMouse(e);
 
         if (!this.draggingItem) return;
 
@@ -74,19 +88,17 @@ class Input {
         const tile = this.grid.snap(iso.x, iso.y);
 
         const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
-
         window.placementpreview.update(tile.x, tile.y, valid);
     }
 
-    onMouseDown(e) {
-        const itemKey = window.ui.pickItem(e);
-        if (!itemKey) return;
+    // ---------------------------------------------------------
+    // POINTER UP
+    // ---------------------------------------------------------
+    onPointerUp(e) {
+        this.updateMouse(e);
 
-        this.draggingItem = { ...Items[itemKey], rotation: 0 };
-        window.input = this; // allow renderer to access draggingItem
-    }
+        if (window.ui && window.ui.dragging) return;
 
-    onMouseUp(e) {
         if (!this.draggingItem) return;
 
         const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
@@ -95,7 +107,7 @@ class Input {
         const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
 
         if (valid) {
-            this.grid.saveState();  
+            this.grid.saveState();
             this.grid.place(tile.x, tile.y, this.draggingItem);
             window.animation.spawnDust(tile.x, tile.y);
         }
@@ -103,49 +115,94 @@ class Input {
         this.draggingItem = null;
         window.placementpreview.clear();
     }
-    
-    onRightClick(e) {
-        e.preventDefault(); // stop browser menu
 
-        if (!this.deleteMode) return; // only delete when active
+    // ---------------------------------------------------------
+    // UI DRAG SUPPORT
+    // ---------------------------------------------------------
+    handleDragMove(x, y, item) {
+        this.mouse.x = x;
+        this.mouse.y = y;
+
+        // ⭐ REQUIRED for rotation during UI drag
+        this.draggingItem = item;
+
+        const iso = this.camera.screenToIso(x, y);
+        const tile = this.grid.snap(iso.x, iso.y);
+
+        const valid = window.placementrules.isValid(tile.x, tile.y, item);
+        window.placementpreview.update(tile.x, tile.y, valid);
+    }
+
+    handleDragEnd(x, y, item) {
+        const iso = this.camera.screenToIso(x, y);
+        const tile = this.grid.snap(iso.x, iso.y);
+
+        if (window.placementrules.isValid(tile.x, tile.y, item)) {
+            this.grid.saveState();
+            this.grid.place(tile.x, tile.y, item);
+            window.animation.spawnDust(tile.x, tile.y);
+        }
+
+        this.draggingItem = null;
+        window.placementpreview.clear();
+    }
+
+    // ---------------------------------------------------------
+    // DELETE
+    // ---------------------------------------------------------
+    deleteAtMouse() {
+        const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+        const tile = this.grid.snap(iso.x, iso.y);
+
+        if (!this.grid.isValidTile(tile.x, tile.y)) return;
+
+        this.grid.saveState();
+        this.grid.removeTopItem(tile.x, tile.y);
+        window.animation.spawnDust(tile.x, tile.y);
+        window.assets.deleteSound?.play();
+    }
+
+    onRightClick(e) {
+        e.preventDefault();
+        if (!this.deleteMode) return;
 
         const iso = this.camera.screenToIso(e.clientX, e.clientY);
         const tile = this.grid.snap(iso.x, iso.y);
 
         if (!this.grid.isValidTile(tile.x, tile.y)) return;
 
-        // Delete the tile contents
-        this.grid.saveState(); 
+        this.grid.saveState();
         this.grid.removeTopItem(tile.x, tile.y);
         window.animation.spawnDust(tile.x, tile.y);
         window.assets.deleteSound?.play();
 
-        // Clear preview + ghost
         window.placementpreview.clear();
         this.draggingItem = null;
     }
 
+    // ---------------------------------------------------------
+    // KEYBOARD
+    // ---------------------------------------------------------
     onKeyDown(e) {
+        // Undo / Redo
+        if (e.ctrlKey && e.key === "z") {
+            this.grid.undo();
+            return;
+        }
+        if (e.ctrlKey && e.key === "y") {
+            this.grid.redo();
+            return;
+        }
 
-    // ⭐ Undo / Redo should always work
-    if (e.ctrlKey && e.key === "z") {
-        this.grid.undo();
-        return;
+        // Rotate
+        if (this.draggingItem && (e.key === "r" || e.key === "R")) {
+            this.rotateItem();
+        }
     }
 
-    if (e.ctrlKey && e.key === "y") {
-        this.grid.redo();
-        return;
-    }
-
-    // Rotation only works when dragging
-    if (!this.draggingItem) return;
-
-    if (e.key === "r" || e.key === "R") {
-        this.rotateItem();
-    }
-}
-
+    // ---------------------------------------------------------
+    // MOUSE WHEEL ROTATE
+    // ---------------------------------------------------------
     onWheel(e) {
         if (!this.draggingItem) return;
 
@@ -153,10 +210,9 @@ class Input {
         this.draggingItem.rotation = (this.draggingItem.rotation + delta + 360) % 360;
     }
 
-    // -----------------------------
-    // MOBILE INPUT
-    // -----------------------------
-
+    // ---------------------------------------------------------
+    // MOBILE TOUCH
+    // ---------------------------------------------------------
     onTouchStart(e) {
         this.touchStartTime = Date.now();
 
@@ -188,63 +244,67 @@ class Input {
         const tile = this.grid.snap(iso.x, iso.y);
 
         const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
-
         window.placementpreview.update(tile.x, tile.y, valid);
     }
 
     onTouchEnd(e) {
-    const duration = Date.now() - this.touchStartTime;
+        const duration = Date.now() - this.touchStartTime;
 
-    // ⭐ LONG PRESS
-    if (duration > 400) {
-
-        // ⭐ DELETE MODE: long‑press delete
-        if (this.deleteMode) {
+        // Long‑press delete
+        if (duration > 400 && this.deleteMode) {
             const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
             const tile = this.grid.snap(iso.x, iso.y);
 
             if (this.grid.isValidTile(tile.x, tile.y)) {
-    this.grid.saveState();   // ⭐ NEW — required for undo
-    this.grid.removeTopItem(tile.x, tile.y);
-    window.animation.spawnDust(tile.x, tile.y);
-    window.assets.deleteSound?.play();
-}
+                this.grid.saveState();
+                this.grid.removeTopItem(tile.x, tile.y);
+                window.animation.spawnDust(tile.x, tile.y);
+                window.assets.deleteSound?.play();
+            }
 
             window.placementpreview.clear();
             this.draggingItem = null;
             return;
         }
 
-        // ⭐ NORMAL MODE: long‑press rotate
-        if (this.draggingItem) {
+        // Long‑press rotate
+        if (duration > 400 && this.draggingItem) {
             this.rotateItem();
-        }
-        return;
-    }
-
-    // ⭐ NORMAL TAP: place item
-    if (this.draggingItem) {
-        const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
-        const tile = this.grid.snap(iso.x, iso.y);
-
-        const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
-
-        if (valid) {
-            this.grid.place(tile.x, tile.y, this.draggingItem);
-            window.animation.spawnDust(tile.x, tile.y);
+            return;
         }
 
-        this.draggingItem = null;
-        window.placementpreview.clear();
+        // Normal tap placement
+        if (this.draggingItem) {
+            const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+            const tile = this.grid.snap(iso.x, iso.y);
+
+            const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+
+            if (valid) {
+                this.grid.saveState();
+                this.grid.place(tile.x, tile.y, this.draggingItem);
+                window.animation.spawnDust(tile.x, tile.y);
+            }
+
+            this.draggingItem = null;
+            window.placementpreview.clear();
+        }
     }
-}
 
-    // -----------------------------
-    // SHARED ROTATION LOGIC
-    // -----------------------------
-
+    // ---------------------------------------------------------
+    // ROTATION
+    // ---------------------------------------------------------
     rotateItem() {
         if (!this.draggingItem) return;
         this.draggingItem.rotation = (this.draggingItem.rotation + 90) % 360;
+    }
+
+    // ---------------------------------------------------------
+    // MOUSE POSITION
+    // ---------------------------------------------------------
+    updateMouse(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        this.mouse.x = e.clientX - rect.left;
+        this.mouse.y = e.clientY - rect.top;
     }
 }
