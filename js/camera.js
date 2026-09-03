@@ -96,25 +96,23 @@ class Camera {
     // ISO → SCREEN
     // ---------------------------------------------------------
     isoToScreen(ix, iy) {
-        const x = (ix - iy) * (this.tileW / 2);
-        const y = (ix + iy) * (this.tileH / 2);
+    const x = (ix - iy) * (this.tileW / 2);
+    const y = (ix + iy) * (this.tileH / 2);
 
-        return {
-            x: this.x + x * this.zoom,
-            y: this.y + y * this.zoom
-        };
-    }
+    return { x, y };
+}
 
     // ---------------------------------------------------------
     // SCREEN → ISO
     // ---------------------------------------------------------
     screenToIso(sx, sy) {
-        const x = (sx - this.x) / this.zoom;
-        const y = (sy - this.y) / this.zoom;
+    // Convert screen → camera space
+    const cx = (sx - this.x) / this.zoom;
+    const cy = (sy - this.y) / this.zoom;
 
-        const ix = (y / (this.tileH / 2) + x / (this.tileW / 2)) / 2;
-        const iy = (y / (this.tileH / 2) - x / (this.tileW / 2)) / 2;
+    const ix = (cy / (this.tileH / 2) + cx / (this.tileW / 2)) / 2;
+    const iy = (cy / (this.tileH / 2) - cx / (this.tileW / 2)) / 2;
 
-        return { x: ix, y: iy };
-    }
+    return { x: ix, y: iy };
 }
+
