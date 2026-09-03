@@ -5,96 +5,88 @@ class Input {
         this.grid = grid;
         this.camera = camera;
 
-        this.draggingItem = null;     // item being dragged from tray
+        this.draggingItem = null;
         this.dragX = 0;
         this.dragY = 0;
 
-        this.activeTouchId = null;
+        this.pointerDown = false;
 
-        this.tileHitCache = [];       // used for fast hit detection
-
-         // 🔥 Disable browser drag/drop so game placement works
-        this.canvas.addEventListener("dragstart", (e) => e.preventDefault());
-        this.canvas.addEventListener("drop", (e) => e.preventDefault());
-        this.canvas.addEventListener("dragover", (e) => e.preventDefault());
-        
         this.bindEvents();
     }
 
     bindEvents() {
-        this.canvas.addEventListener("touchstart", (e) => this.onTouchStart(e), { passive: false });
-        this.canvas.addEventListener("touchmove", (e) => this.onTouchMove(e), { passive: false });
-        this.canvas.addEventListener("touchend", (e) => this.onTouchEnd(e), { passive: false });
+        // Use pointer events for both mouse + touch
+        this.canvas.addEventListener("pointerdown", (e) => this.onPointerDown(e));
+        this.canvas.addEventListener("pointermove", (e) => this.onPointerMove(e));
+        this.canvas.addEventListener("pointerup", (e) => this.onPointerUp(e));
+        this.canvas.addEventListener("pointercancel", (e) => this.onPointerUp(e));
     }
 
-    getTouch(e) {
-        const t = e.changedTouches[0];
-        return { x: t.clientX, y: t.clientY, id: t.identifier };
+    getPos(e) {
+        return {
+            x: e.clientX,
+            y: e.clientY
+        };
     }
 
-    onTouchStart(e) {
-    e.preventDefault();
-    const t = this.getTouch(e);
+    onPointerDown(e) {
+        this.pointerDown = true;
 
-    this.activeTouchId = t.id;
+        const pos = this.getPos(e);
 
-    // Start swipe detection for camera
-    this.camera.startSwipe(t.x);
+        // Start swipe detection
+        this.camera.startSwipe(pos.x);
 
-    // Check if user tapped a tile
-    const tile = this.getTileAt(t.x, t.y);
-    if (tile) {
-
-        // 🔥 DEBUG OVERLAY EVENT
-        document.dispatchEvent(new CustomEvent("tile-hover", { detail: tile }));
-
-        this.grid.selectTile(tile.x, tile.y);
-        return;
-    }
-
-        // Check if user tapped an item in the tray
-        const trayItem = this.checkTrayHit(t.x, t.y);
-        if (trayItem) {
-            this.draggingItem = Items[trayItem];
-            this.dragX = t.x;
-            this.dragY = t.y;
+        // Check tile hit
+        const tile = this.getTileAt(pos.x, pos.y);
+        if (tile) {
+            document.dispatchEvent(new CustomEvent("tile-hover", { detail: tile }));
+            this.grid.selectTile(tile.x, tile.y);
             return;
         }
 
-        // Otherwise clear selection
+        // Check tray hit
+        const trayItem = this.checkTrayHit(pos.x, pos.y);
+        if (trayItem) {
+            this.draggingItem = Items[trayItem];
+            this.dragX = pos.x;
+            this.dragY = pos.y;
+            return;
+        }
+
+        // Clear selection
         this.grid.clearSelection();
     }
 
-    onTouchMove(e) {
-    e.preventDefault();
-    const t = this.getTouch(e);
+    onPointerMove(e) {
+        if (!this.pointerDown) return;
 
-    // Check tile under finger while moving
-    const tile = this.getTileAt(t.x, t.y);
-    if (tile) {
+        const pos = this.getPos(e);
 
-        // 🔥 DEBUG OVERLAY EVENT
-        document.dispatchEvent(new CustomEvent("tile-hover", { detail: tile }));
-    }
+        // Tile hover
+        const tile = this.getTileAt(pos.x, pos.y);
+        if (tile) {
+            document.dispatchEvent(new CustomEvent("tile-hover", { detail: tile }));
+        }
 
-    if (this.draggingItem) {
-        this.dragX = t.x;
-        this.dragY = t.y;
-    }
-}
-
-    onTouchEnd(e) {
-        e.preventDefault();
-        const t = this.getTouch(e);
-
-        // End swipe detection for camera
-        this.camera.endSwipe(t.x);
-
+        // Dragging item
         if (this.draggingItem) {
-            const tile = this.getTileAt(t.x, t.y);
+            this.dragX = pos.x;
+            this.dragY = pos.y;
+        }
+    }
+
+    onPointerUp(e) {
+        const pos = this.getPos(e);
+
+        // End swipe
+        this.camera.endSwipe(pos.x);
+
+        // Placement
+        if (this.draggingItem) {
+            const tile = this.getTileAt(pos.x, pos.y);
 
             if (tile) {
-                // Ask placement.js to validate and place
                 Placement.attemptPlacement(
                     this.grid,
                     tile.x,
@@ -106,31 +98,26 @@ class Input {
             this.draggingItem = null;
         }
 
-        this.activeTouchId = null;
+        this.pointerDown = false;
     }
 
-    // Convert screen coordinates → tile coordinates
+    // Convert screen → tile
     getTileAt(screenX, screenY) {
         const tileWidth = 96;
         const tileHeight = 48;
 
-        const offsetX = this.canvas.width / 2;
-        const offsetY = this.canvas.height / 2;
-
-        // Reverse isometric projection
         for (let y = 0; y < this.grid.height; y++) {
             for (let x = 0; x < this.grid.width; x++) {
 
                 const pos = this.isoToScreen(x, y);
 
-                // Diamond hit detection
                 const dx = screenX - pos.x;
                 const dy = screenY - pos.y;
 
+                // Correct diamond hit detection
                 const inside =
                     Math.abs(dx) / (tileWidth / 2) +
                     Math.abs(dy) / (tileHeight / 2) <= 1;
-
 
                 if (inside) {
                     return { x, y };
@@ -142,48 +129,20 @@ class Input {
     }
 
     isoToScreen(x, y) {
-    const angle = this.camera.angle;
-    const tileWidth = 96;
-    const tileHeight = 48;
-
-    let rx = x;
-    let ry = y;
-
-    if (angle === 90) {
-        rx = this.grid.height - y - 1;
-        ry = x;
-    } else if (angle === 180) {
-        rx = this.grid.width - x - 1;
-        ry = this.grid.height - y - 1;
-    } else if (angle === 270) {
-        rx = y;
-        ry = this.grid.width - x - 1;
+        return this.camera.isoToScreen(x, y);
     }
 
-    // USE THE SAME OFFSETS AS THE RENDERER
-    const totalHeight = this.grid.height * tileHeight / 2;
-    const offsetX = window.innerWidth / 2;
-    const offsetY = window.innerHeight / 2 - totalHeight / 2;
-
-    const screenX = (rx - ry) * (tileWidth / 2) + offsetX;
-    const screenY = (rx + ry) * (tileHeight / 2) + offsetY;
-
-    return { x: screenX, y: screenY };
-}
-
-    // Check if user tapped an item in the bottom tray
+    // Bottom tray hit detection
     checkTrayHit(x, y) {
         const tray = document.getElementById("bottom-tray");
         const rect = tray.getBoundingClientRect();
 
         if (y < rect.top || y > rect.bottom) return null;
 
-        // Find which item was tapped
-        const elements = tray.children;
-        for (let el of elements) {
+        for (let el of tray.children) {
             const r = el.getBoundingClientRect();
             if (x >= r.left && x <= r.right) {
-                return el.dataset.item; // item name
+                return el.dataset.item;
             }
         }
 
