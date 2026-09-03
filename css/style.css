@@ -63,6 +63,11 @@ body, html {
     transform: scale(0.92);
 }
 
+#side-buttons button.active {
+    background: rgba(255, 80, 80, 0.8);
+    color: white;
+}
+
 /* Mobile rotate button */
 #rotateBtn {
     position: fixed;
