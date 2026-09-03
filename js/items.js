@@ -1,75 +1,51 @@
-// items.js
-const Items = {
-
-    // -----------------------------
-    // FLOOR
-    // -----------------------------
-    "stone_slab": {
-        name: "Stone Slab",
+// Items.js
+window.Items = {
+    floor: {
+        key: "floor",
         category: "floor",
-        icon: "assets/items/floor.png",
+        icon: "floor.png",
         rotation: 0
     },
 
-    // -----------------------------
-    // WALLS
-    // -----------------------------
-    "wood_wall": {
-        name: "Wooden Wall Panel",
+    wall: {
+        key: "wall",
         category: "wall",
-        icon: "assets/items/wall.png",
+        icon: "wall.png",
         rotation: 0
     },
 
-    // -----------------------------
-    // DOOR
-    // -----------------------------
-    "wood_door": {
-        name: "Wooden Door",
-        category: "door",
-        icon: "assets/items/door.png",
-        rotation: 0
-    },
-
-    // -----------------------------
-    // WINDOWS
-    // -----------------------------
-    "bubble_window": {
-        name: "Bubble Glass Window",
-        category: "window",
-        icon: "assets/items/window.png",
-        rotation: 0
-    },
-
-    // -----------------------------
-    // ROOF
-    // -----------------------------
-    "reed_roof": {
-        name: "Woven Reed Roof Tile",
+    roof: {
+        key: "roof",
         category: "roof",
-        icon: "assets/items/roof.png",
+        icon: "roof.png",
         rotation: 0
     },
 
-    // -----------------------------
-    // DECOR (Mushroom Torch)
-    // -----------------------------
-    "mushroom_torch": {
-        name: "Glowing Mushroom Torch",
+    decorPlant: {
+        key: "decorPlant",
         category: "decor",
-        type: "mushroom",
-        icon: "assets/items/mushroom.png",
+        icon: "decor_plant.png",
         rotation: 0
     },
 
-    // -----------------------------
-    // FINAL PIECE — Lantern of Friendship
-    // -----------------------------
-    "lantern_friendship": {
-        name: "Lantern of Friendship",
-        category: "decor",          // ⭐ FIXED: must be decor
-        type: "lantern",
-        icon: "assets/items/lantern.png",
-        rotation: 0                 // ⭐ FIXED: comma added
+    decorTable: {
+        key: "decorTable",
+        category: "decor",
+        icon: "decor_table.png",
+        rotation: 0
+    },
+
+    door: {
+        key: "door",
+        category: "door",
+        icon: "door.png",
+        rotation: 0
+    },
+
+    window: {
+        key: "window",
+        category: "window",
+        icon: "window.png",
+        rotation: 0
     }
 };
