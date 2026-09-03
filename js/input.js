@@ -44,9 +44,6 @@ class Input {
     const rotateBtn = document.getElementById("rotateBtn");
     if (rotateBtn) {
         rotateBtn.addEventListener("click", () => this.rotateItem());
-        
-        // DESKTOP: right‑click delete
-this.canvas.addEventListener("contextmenu", (e) => this.onRightClick(e));
     }
 
     // DELETE BUTTON — ⭐ FIXED
@@ -57,7 +54,11 @@ this.canvas.addEventListener("contextmenu", (e) => this.onRightClick(e));
             deleteBtn.classList.toggle("active", this.deleteMode);
         });
     }
+
+    // DESKTOP: right‑click delete
+    this.canvas.addEventListener("contextmenu", (e) => this.onRightClick(e));
 }
+
 
     // -----------------------------
     // DESKTOP INPUT
