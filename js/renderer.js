@@ -85,21 +85,31 @@ class Renderer {
         }
     }
 
-    drawTileStack(x, y, cell) {
-        const pos = this.grid.isoToScreen(x, y, this.camera);
+   drawTileStack(x, y, cell) {
+    const pos = this.grid.isoToScreen(x, y, this.camera);
 
-        // Draw each item in the stack
-        cell.forEach(item => {
-            const img = window.assets[item.icon];
-            if (!img) return;
+    const drawItem = (item) => {
+        if (!item) return;
+        const img = window.assets[item.icon];
+        if (!img) return;
 
-            this.ctx.save();
-            this.ctx.translate(pos.x, pos.y);
-            this.ctx.rotate((item.rotation || 0) * Math.PI / 180);
-            this.ctx.drawImage(img, -img.width / 2, -img.height / 2);
-            this.ctx.restore();
-        });
-    }
+        this.ctx.save();
+        this.ctx.translate(pos.x, pos.y);
+        this.ctx.rotate((item.rotation || 0) * Math.PI / 180);
+        this.ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        this.ctx.restore();
+    };
+
+    // Draw in correct order
+    drawItem(cell.floor);
+    drawItem(cell.wall);
+    drawItem(cell.roof);
+
+    cell.decor.forEach(drawItem);
+
+    drawItem(cell.door);
+    drawItem(cell.window);
+}
 
     // ---------------------------------------------------------
     // DRAG GHOST
