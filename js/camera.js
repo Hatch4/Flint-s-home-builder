@@ -49,6 +49,22 @@ class Camera {
         rx = y;
         ry = this.grid.width - x - 1;
     }
+        screenToIso(screenX, screenY) {
+    const offsetX = this.canvas.width / 2;
+    const gridPixelHeight = (this.grid.width + this.grid.height) * (this.tileHeight / 2);
+    const offsetY = (this.canvas.height - gridPixelHeight) / 2;
+
+    const x = screenX - offsetX;
+    const y = screenY - offsetY;
+
+    const isoX = Math.floor((y / (this.tileHeight / 2) + x / (this.tileWidth / 2)) / 2);
+    const isoY = Math.floor((y / (this.tileHeight / 2) - x / (this.tileWidth / 2)) / 2);
+
+    if (isoX < 0 || isoY < 0 || isoX >= this.grid.width || isoY >= this.grid.height)
+        return null;
+
+    return { x: isoX, y: isoY };
+}
 
     // ⭐ Perfect centering math
     const gridPixelHeight = (this.grid.width + this.grid.height) * (tileHeight / 2);
