@@ -1,5 +1,5 @@
 // PlacementPreview.js
-window.PlacementPreview = {
+window.placementpreview = {
     tile: null,
     valid: false,
 
