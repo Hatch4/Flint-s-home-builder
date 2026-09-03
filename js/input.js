@@ -44,6 +44,9 @@ class Input {
     const rotateBtn = document.getElementById("rotateBtn");
     if (rotateBtn) {
         rotateBtn.addEventListener("click", () => this.rotateItem());
+        
+        // DESKTOP: right‑click delete
+this.canvas.addEventListener("contextmenu", (e) => this.onRightClick(e));
     }
 
     // DELETE BUTTON — ⭐ FIXED
@@ -97,6 +100,24 @@ class Input {
 
         this.draggingItem = null;
         window.placementpreview.clear();
+    }
+    
+    onRightClick(e) {
+        e.preventDefault(); // stop browser menu
+
+        if (!this.deleteMode) return; // only delete when active
+
+        const iso = this.camera.screenToIso(e.clientX, e.clientY);
+        const tile = this.grid.snap(iso.x, iso.y);
+
+        if (!this.grid.isValidTile(tile.x, tile.y)) return;
+
+        // Delete the tile contents
+        this.grid.removeItem(tile.x, tile.y);
+
+        // Clear preview + ghost
+        window.placementpreview.clear();
+        this.draggingItem = null;
     }
 
     onKeyDown(e) {
