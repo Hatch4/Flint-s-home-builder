@@ -1,5 +1,5 @@
 // placement.js
-class placement {
+class Placement {
    static attemptPlacement(grid, x, y, item) {
     if (!item) return false;
 
