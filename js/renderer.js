@@ -6,8 +6,8 @@ class Renderer {
         this.grid = grid;
         this.camera = camera;
 
-        this.tileWidth = 96;
-        this.tileHeight = 48;
+        this.tileW = 96;
+        this.tileH = 48;
 
         this.resize();
         window.addEventListener("resize", () => this.resize());
@@ -24,8 +24,20 @@ class Renderer {
 
     render() {
         this.clear();
+
         this.drawGrid();
         this.drawTiles();
+
+        // Placement preview (green/red diamond)
+        window.placementpreview.draw(this.ctx, this.camera);
+
+        // Dust puff animation
+        window.animation.draw(this.ctx, this.camera);
+
+        // Drag ghost
+        this.drawGhost();
+
+        // Selection highlight (optional)
         this.drawSelection();
     }
 
@@ -38,13 +50,12 @@ class Renderer {
 
         for (let y = 0; y < this.grid.height; y++) {
             for (let x = 0; x < this.grid.width; x++) {
-                const pos = this.camera.isoToScreen(x, y);
-                console.log("Grid draw:", this.camera.isoToScreen(0, 0));
+                const pos = this.grid.isoToScreen(x, y, this.camera);
+
+                const w = this.tileW / 2;
+                const h = this.tileH / 2;
 
                 // diamond outline
-                const w = this.tileWidth / 2;
-                const h = this.tileHeight / 2;
-
                 this.ctx.beginPath();
                 this.ctx.moveTo(pos.x, pos.y - h);
                 this.ctx.lineTo(pos.x + w, pos.y);
@@ -64,79 +75,83 @@ class Renderer {
     drawTiles() {
         for (let y = 0; y < this.grid.height; y++) {
             for (let x = 0; x < this.grid.width; x++) {
-                const tile = this.grid.tiles[y][x];
-                const pos = this.camera.isoToScreen(x, y);
-
-                // floor
-                if (tile.floor) {
-                    this.drawFloor(pos.x, pos.y);
-                }
-
-                // wall / door / window
-                if (tile.wall) {
-                    this.drawWall(pos.x, pos.y, tile.wall.type);
-                }
-
-                // roof
-                if (tile.roof) {
-                    this.drawRoof(pos.x, pos.y);
-                }
-
-                // decor
-                if (tile.decor) {
-                    this.drawDecor(pos.x, pos.y, tile.decor.type);
-                }
+                const cell = this.grid.tiles[y][x];
+                this.drawTile(x, y, cell);
             }
         }
     }
 
-   drawFloor(x, y) {
-    const img = window.assets.floor;
-    if (!img) return;
+    drawTile(x, y, cell) {
+        const pos = this.grid.isoToScreen(x, y, this.camera);
 
-    const w = this.tileWidth;
-    const h = this.tileHeight;
+        // FLOOR
+        if (cell.floor) {
+            const img = window.assets.floor;
+            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
+        }
 
-    // Draw centered on the diamond
-    this.ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
-}
+        // WALL
+        if (cell.wall) {
+            const img = window.assets.wall;
+            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
+        }
 
-    drawWall(x, y, type) {
-    const img = window.assets.wall;
-    if (!img) return;
+        // ROOF
+        if (cell.roof) {
+            const img = window.assets.roof;
+            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
+        }
 
-    const w = this.tileWidth;
-    const h = this.tileHeight;
+        // DECOR (multiple)
+        cell.decor.forEach(decorItem => {
+            const img = window.assets[decorItem.type];
+            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
+        });
 
-    // Walls sit ABOVE the tile
-    this.ctx.drawImage(img, x - w / 2, y - h - 40, w, 80);
-}
+        // DOOR
+        if (cell.door) {
+            const img = window.assets.door;
+            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
+        }
 
-    drawRoof(x, y) {
-    const img = window.assets.roof;
-    if (!img) return;
+        // WINDOW
+        if (cell.window) {
+            const img = window.assets.window;
+            if (img) this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
+        }
+    }
 
-    const w = this.tileWidth;
-    const h = this.tileHeight;
+    drawGhost() {
+        if (!window.input || !window.input.draggingItem) return;
 
-    this.ctx.drawImage(img, x - w / 2, y - h - 60, w, 60);
-}
+        const draggingItem = window.input.draggingItem;
+        const mouse = window.input.mouse;
 
-    drawDecor(x, y, type) {
-    const key = type === "mushroom" ? "decor_mushroom" : "decor_lantern";
-    const img = window.assets[key];
-    if (!img) return;
+        const iso = this.camera.screenToIso(mouse.x, mouse.y);
+        const tile = this.grid.snap(iso.x, iso.y);
+        const pos = this.grid.isoToScreen(tile.x, tile.y, this.camera);
 
-    this.ctx.drawImage(img, x - 20, y - 40, 40, 40);
-}
+        const img =
+            window.assets[draggingItem.category] ||
+            window.assets[draggingItem.type];
+
+        if (!img) return;
+
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.6;
+        this.ctx.drawImage(img, pos.x - img.width/2, pos.y - img.height/2);
+        this.ctx.globalAlpha = 1;
+        this.ctx.restore();
+    }
 
     drawSelection() {
-        if (!this.grid.selected) return;
+        if (!this.grid.selectedTile) return;
 
-        const { x, y } = this.grid.selected;
-        const pos = this.camera.isoToScreen(x, y);
-        const w = this.tileWidth / 2;
-        const h = this.tileHeight / 2;
+        const { x, y } = this.grid.selectedTile;
+        const pos = this.grid.isoToScreen(x, y, this.camera);
+
+        const w = this.tileW / 2;
+        const h = this.tileH / 2;
 
         this.ctx.save();
         this.ctx.strokeStyle = "#ff0000";
