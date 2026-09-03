@@ -3,8 +3,8 @@ window.placementpreview = {
     tile: null,
     valid: false,
 
-    update(tileX, tileY, isValid) {
-        this.tile = { x: tileX, y: tileY };
+    update(x, y, isValid) {
+        this.tile = { x, y };
         this.valid = isValid;
     },
 
@@ -15,23 +15,30 @@ window.placementpreview = {
     draw(ctx, camera) {
         if (!this.tile) return;
 
-        const iso = window.grid.isoToScreen(this.tile.x, this.tile.y, camera);
+        const { x, y } = this.tile;
+
+        // Convert tile → screen
+        const pos = window.grid.isoToScreen(x, y, camera);
+
+        const w = window.grid.tileW / 2;
+        const h = window.grid.tileH / 2;
 
         ctx.save();
-        ctx.translate(iso.x, iso.y);
+        ctx.translate(pos.x, pos.y);
 
         ctx.fillStyle = this.valid
             ? "rgba(0,255,0,0.35)"
             : "rgba(255,0,0,0.35)";
 
         ctx.beginPath();
-        ctx.moveTo(0, -window.grid.tileH / 2);
-        ctx.lineTo(window.grid.tileW / 2, 0);
-        ctx.lineTo(0, window.grid.tileH / 2);
-        ctx.lineTo(-window.grid.tileW / 2, 0);
+        ctx.moveTo(0, -h);
+        ctx.lineTo(w, 0);
+        ctx.lineTo(0, h);
+        ctx.lineTo(-w, 0);
         ctx.closePath();
         ctx.fill();
 
         ctx.restore();
     }
 };
+
