@@ -103,6 +103,46 @@ class Grid {
         if (!this.isValidTile(x, y)) return;
         this.tiles[y][x] = this.createEmptyTile();
     }
+    removeTopItem(x, y) {
+    const cell = this.tiles[y][x];
+    if (!cell) return;
+
+    // Decor (array)
+    if (cell.decor && cell.decor.length > 0) {
+        cell.decor.pop();
+        return;
+    }
+
+    // Window
+    if (cell.window) {
+        cell.window = null;
+        return;
+    }
+
+    // Door
+    if (cell.door) {
+        cell.door = null;
+        return;
+    }
+
+    // Wall
+    if (cell.wall) {
+        cell.wall = null;
+        return;
+    }
+
+    // Roof
+    if (cell.roof) {
+        cell.roof = null;
+        return;
+    }
+
+    // Floor
+    if (cell.floor) {
+        cell.floor = null;
+        return;
+    }
+}
 
     // Expand grid outward
     isEdgeTile(x, y) {
