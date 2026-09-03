@@ -1,5 +1,5 @@
 // save.js
-class save {
+class Save {
     constructor(game) {
         this.game = game;
         this.key = "flint_octopus_house_save";
