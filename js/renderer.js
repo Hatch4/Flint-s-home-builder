@@ -90,21 +90,16 @@ class Renderer {
         }
     }
 
-    drawFloor(x, y) {
-        const w = this.tileWidth / 2;
-        const h = this.tileHeight / 2;
+   drawFloor(x, y) {
+    const img = window.assets.floor;
+    if (!img) return;
 
-        this.ctx.save();
-        this.ctx.fillStyle = "#c2e0ff";
-        this.ctx.beginPath();
-        this.ctx.moveTo(x, y - h);
-        this.ctx.lineTo(x + w, y);
-        this.ctx.lineTo(x, y + h);
-        this.ctx.lineTo(x - w, y);
-        this.ctx.closePath();
-        this.ctx.fill();
-        this.ctx.restore();
-    }
+    const w = this.tileWidth;
+    const h = this.tileHeight;
+
+    // Draw centered on the diamond
+    this.ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
+}
 
     drawWall(x, y, type) {
         const w = this.tileWidth / 2;
