@@ -1,5 +1,5 @@
 // PlacementRules.js
-window.PlacementRules = {
+window.placementrules = {
     isValid(tileX, tileY, item) {
         const cell = window.grid.get(tileX, tileY);
         if (!cell) return false;
