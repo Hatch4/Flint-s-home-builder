@@ -128,8 +128,9 @@ class Input {
                 const dy = screenY - pos.y;
 
                 const inside =
-                    Math.abs(dx) <= tileWidth / 2 &&
-                    Math.abs(dy - tileHeight / 2) <= tileHeight / 2;
+                    Math.abs(dx) / (tileWidth / 2) +
+                    Math.abs(dy) / (tileHeight / 2) <= 1;
+
 
                 if (inside) {
                     return { x, y };
