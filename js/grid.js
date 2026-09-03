@@ -4,12 +4,16 @@ class Grid {
         this.width = startWidth;
         this.height = startHeight;
 
+        this.tileW = 96;
+        this.tileH = 48;
+
         this.tiles = [];
         this.selectedTile = null;
 
         this.initTiles();
     }
 
+    // Create initial grid
     initTiles() {
         this.tiles = [];
 
@@ -22,6 +26,7 @@ class Grid {
         }
     }
 
+    // Tile structure
     createEmptyTile() {
         return {
             floor: null,
@@ -33,39 +38,56 @@ class Grid {
         };
     }
 
-    // ⭐ NEW unified placement system
+    // Unified placement system
     place(x, y, item) {
         const cell = this.get(x, y);
         if (!cell) return;
 
+        // Copy item so each tile stores its own rotation
+        const placedItem = {
+            ...item,
+            rotation: item.rotation || 0
+        };
+
         switch (item.category) {
             case "floor":
-                cell.floor = item;
+                cell.floor = placedItem;
                 break;
 
             case "wall":
-                cell.wall = item;
+                cell.wall = placedItem;
                 break;
 
             case "roof":
-                cell.roof = item;
+                cell.roof = placedItem;
                 break;
 
             case "decor":
-                cell.decor.push(item);
+                cell.decor.push(placedItem);
                 break;
 
             case "door":
-                cell.door = item;
+                cell.door = placedItem;
                 break;
 
             case "window":
-                cell.window = item;
+                cell.window = placedItem;
                 break;
         }
     }
 
-    // Select a tile (for highlighting)
+    // Get tile safely
+    get(x, y) {
+        if (!this.isValidTile(x, y)) return null;
+        return this.tiles[y][x];
+    }
+
+    // Tile validation
+    isValidTile(x, y) {
+        return x >= 0 && y >= 0 && x < this.width && y < this.height;
+    }
+
+    // Select tile (optional highlight)
     selectTile(x, y) {
         if (this.isValidTile(x, y)) {
             this.selectedTile = { x, y };
@@ -76,51 +98,13 @@ class Grid {
         this.selectedTile = null;
     }
 
-    isValidTile(x, y) {
-        return x >= 0 && y >= 0 && x < this.width && y < this.height;
-    }
-
-    // OLD placement functions — you can delete these later
-    placeFloor(x, y) {
-        if (!this.isValidTile(x, y)) return false;
-
-        this.tiles[y][x].floor = true;
-
-        if (this.isEdgeTile(x, y)) {
-            this.expandGrid(x, y);
-        }
-
-        return true;
-    }
-
-    placeWall(x, y, wallData) {
-        if (!this.isValidTile(x, y)) return false;
-
-        this.tiles[y][x].wall = wallData;
-        return true;
-    }
-
-    placeRoof(x, y) {
-        if (!this.isValidTile(x, y)) return false;
-
-        this.tiles[y][x].roof = true;
-        return true;
-    }
-
-    placeDecor(x, y, decorData) {
-        if (!this.isValidTile(x, y)) return false;
-
-        this.tiles[y][x].decor = decorData;
-        return true;
-    }
-
+    // Remove everything from tile
     removeItem(x, y) {
-        if (!this.isValidTile(x, y)) return false;
-
+        if (!this.isValidTile(x, y)) return;
         this.tiles[y][x] = this.createEmptyTile();
-        return true;
     }
 
+    // Expand grid outward
     isEdgeTile(x, y) {
         return (
             x === 0 ||
@@ -131,13 +115,13 @@ class Grid {
     }
 
     expandGrid(x, y) {
-        let expandLeft = x === 0;
-        let expandRight = x === this.width - 1;
-        let expandTop = y === 0;
-        let expandBottom = y === this.height - 1;
-
         const maxWidth = 10;
         const maxHeight = 8;
+
+        const expandLeft = x === 0;
+        const expandRight = x === this.width - 1;
+        const expandTop = y === 0;
+        const expandBottom = y === this.height - 1;
 
         if (expandLeft && this.width < maxWidth) {
             this.width++;
@@ -188,6 +172,25 @@ class Grid {
         this.tiles.push(newRow);
     }
 
+    // Snap iso coords to nearest tile
+    snap(isoX, isoY) {
+        return {
+            x: Math.round(isoX),
+            y: Math.round(isoY)
+        };
+    }
+
+    // Convert iso → screen
+    isoToScreen(x, y, camera) {
+        const screenX =
+            (x - y) * (this.tileW / 2) - camera.x + window.innerWidth / 2;
+        const screenY =
+            (x + y) * (this.tileH / 2) - camera.y + window.innerHeight / 2;
+
+        return { x: screenX, y: screenY };
+    }
+
+    // Save grid
     serialize() {
         return {
             width: this.width,
@@ -196,6 +199,7 @@ class Grid {
         };
     }
 
+    // Load grid
     deserialize(data) {
         this.width = data.width;
         this.height = data.height;
