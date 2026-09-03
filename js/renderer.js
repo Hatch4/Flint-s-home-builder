@@ -39,6 +39,7 @@ class Renderer {
         for (let y = 0; y < this.grid.height; y++) {
             for (let x = 0; x < this.grid.width; x++) {
                 const pos = this.camera.isoToScreen(x, y);
+                console.log("Grid draw:", this.camera.isoToScreen(0, 0));
 
                 // diamond outline
                 const w = this.tileWidth / 2;
