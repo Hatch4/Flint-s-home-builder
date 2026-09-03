@@ -23,6 +23,38 @@ window.onload = () => {
 
         game.debug = new DebugOverlay(game);
 
+        document.getElementById("save-btn").addEventListener("click", () => {
+    const data = grid.serialize();
+    const json = JSON.stringify(data);
+
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "my_build.json";
+    a.click();
+
+    URL.revokeObjectURL(url);
+});
+        document.getElementById("load-btn").addEventListener("click", () => {
+    document.getElementById("load-file").click();
+});
+
+document.getElementById("load-file").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        const data = JSON.parse(reader.result);
+        grid.deserialize(data);
+        grid.undoStack = [];
+        grid.redoStack = [];
+    };
+    reader.readAsText(file);
+});
+
         // Load previous save
         game.save.load();
 
