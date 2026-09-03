@@ -16,17 +16,60 @@ html, body {
     z-index: 1;        
 }
 
+/* Make UI layer click-through except for actual UI elements */
 #ui-layer {
     position: absolute;
     width: 100%;
     height: 100%;
-    pointer-events: none;   /* ⭐ Make UI layer click-through */
+    pointer-events: none;
     z-index: 10;
 }
 
-/* ⭐ Allow actual UI elements to still receive clicks */
 #ui-layer * {
     pointer-events: auto;
+}
+
+/* Tray items */
+.tray-item {
+    width: 80px;
+    height: 80px;
+    margin: 6px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255,255,255,0.8);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s ease-out;
+}
+
+.tray-item:active {
+    transform: scale(0.9);
+}
+
+.tray-item img {
+    width: 70px;
+    height: 70px;
+    pointer-events: none;
+}
+
+/* Floating ghost item */
+#drag-ghost {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.15s ease-out;
+    z-index: 999;
+}
+
+#drag-ghost img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
 }
 
 #top-bar {
