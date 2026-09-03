@@ -1,80 +1,65 @@
 // main.js
 let canvas, ctx;
-let game = {};
 
 window.onload = () => {
-    window.assets.load(() => {
+    canvas = document.getElementById("gameCanvas");
+    ctx = canvas.getContext("2d");
 
-        canvas = document.getElementById("gameCanvas");
-        ctx = canvas.getContext("2d");
+    resizeCanvas();
 
-        resizeCanvas();
+    // ---------------------------------------------------------
+    // CORE GAME OBJECTS
+    // ---------------------------------------------------------
+    window.grid = new Grid(5, 4);
+    window.camera = new Camera(window.grid, canvas);
+    window.renderer = new Renderer(canvas, window.grid, window.camera);
+    window.input = new Input(canvas, window.grid, window.camera);
 
-        // Core game objects
-        game.grid = new Grid(5, 4);
-        game.camera = new Camera(game.grid, canvas);
-        game.renderer = new Renderer(canvas, game.grid, game.camera);
-        game.input = new Input(canvas, game.grid, game.camera);
-        game.items = Items;
+    // Items are already global via Items.js
+    window.items = window.Items;
 
-        game.save = new Save(game);                 // load save BEFORE requirements
-        game.requirements = new Requirements(game); // requirements BEFORE UI
-        game.placementrules = new placementrules(game);
-       // placementrules is already defined as a plain object in PlacementRules.js
-        // No instantiation needed.
-        game.ui = new UI(game);                     // UI LAST
+    // Save system (optional)
+    window.save = new Save(window);
 
-        game.debug = new DebugOverlay(game);
+    // Requirements system (optional)
+    window.requirements = new Requirements(window);
 
-        document.getElementById("save-btn").addEventListener("click", () => {
-    const data = game.grid.serialize();   // ⭐ FIXED
-    const json = JSON.stringify(data);
+    // ---------------------------------------------------------
+    // PLACEMENT RULES (IMPORTANT)
+    // DO NOT USE "new" — PlacementRules.js defines a plain object
+    // ---------------------------------------------------------
+    // PlacementRules.js already did:
+    // window.placementrules = { isValid(...) }
+    // So we do NOT instantiate anything here.
 
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
+    // ---------------------------------------------------------
+    // LOAD SAVE (if any)
+    // ---------------------------------------------------------
+    if (window.save && window.save.load) {
+        window.save.load();
+    }
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "my_build.json";
-    a.click();
+    // ---------------------------------------------------------
+    // DEBUG OVERLAY (optional)
+    // ---------------------------------------------------------
+    window.debug = new DebugOverlay(window);
 
-    URL.revokeObjectURL(url);
-});
-
-document.getElementById("load-btn").addEventListener("click", () => {
-    document.getElementById("load-file").click();
-});
-
-document.getElementById("load-file").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-        const data = JSON.parse(reader.result);
-        game.grid.deserialize(data);          
-        game.grid.undoStack = [];             
-        game.grid.redoStack = [];             
-    };
-    reader.readAsText(file);
-});
-
-        // Load previous save
-        game.save.load();
-
-        // Start render loop
-        requestAnimationFrame(loop);
-    });
+    // ---------------------------------------------------------
+    // START GAME LOOP
+    // ---------------------------------------------------------
+    requestAnimationFrame(loop);
 };
 
 function loop() {
-    game.renderer.render();
-    game.debug.draw(ctx); // optional
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    window.renderer.render();
+    window.debug.draw(ctx);
+
     requestAnimationFrame(loop);
 }
 
 function resizeCanvas() {
-    if (!canvas) return;   // prevents early resize crash
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
