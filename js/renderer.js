@@ -3,7 +3,6 @@ class Renderer {
     constructor(canvas, grid, camera) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
-
         this.grid = grid;
         this.camera = camera;
 
@@ -25,25 +24,36 @@ class Renderer {
 
     render() {
         this.clear();
+
         this.drawGrid();
         this.drawTiles();
+
+        if (window.placementpreview) {
+            window.placementpreview.draw(this.ctx, this.camera);
+        }
+
+        if (window.animation) {
+            window.animation.draw(this.ctx, this.camera);
+        }
+
+        this.drawGhost();
+        this.drawDeletePreview();
         this.drawSelection();
-        this.drawPreview();
-        this.drawDraggingItem();
     }
 
     // ---------------------------------------------------------
-    // GRID LINES
+    // DRAW GRID (debug)
     // ---------------------------------------------------------
     drawGrid() {
         this.ctx.save();
-        this.ctx.strokeStyle = "rgba(0, 128, 0, 0.4)";
+        this.ctx.strokeStyle = "rgba(0, 255, 0, 0.25)";
         this.ctx.lineWidth = 1;
+        this.ctx.font = "12px Arial";
+        this.ctx.fillStyle = "rgba(255,255,255,0.6)";
 
         for (let y = 0; y < this.grid.height; y++) {
             for (let x = 0; x < this.grid.width; x++) {
-
-                const pos = this.camera.isoToScreen(x, y);
+                const pos = this.grid.isoToScreen(x, y, this.camera);
 
                 const w = this.tileW / 2;
                 const h = this.tileH / 2;
@@ -55,6 +65,8 @@ class Renderer {
                 this.ctx.lineTo(pos.x - w, pos.y);
                 this.ctx.closePath();
                 this.ctx.stroke();
+
+                this.ctx.fillText(`${x},${y}`, pos.x - 12, pos.y + 4);
             }
         }
 
@@ -62,32 +74,84 @@ class Renderer {
     }
 
     // ---------------------------------------------------------
-    // DRAW ALL PLACED ITEMS
+    // DRAW ALL TILE STACKS
     // ---------------------------------------------------------
     drawTiles() {
         for (let y = 0; y < this.grid.height; y++) {
             for (let x = 0; x < this.grid.width; x++) {
-
-                const stack = this.grid.cells[y][x];
-                if (stack.length === 0) continue;
-
-                const pos = this.camera.isoToScreen(x, y);
-
-                for (const item of stack) {
-                    this.drawItem(pos.x, pos.y, item);
-                }
+                const cell = this.grid.tiles[y][x];
+                this.drawTileStack(x, y, cell);
             }
         }
     }
 
-    drawItem(x, y, item) {
-        const img = window.assets.get(item.icon);
+    drawTileStack(x, y, cell) {
+        const pos = this.grid.isoToScreen(x, y, this.camera);
+
+        // Draw each item in the stack
+        cell.forEach(item => {
+            const img = window.assets[item.icon];
+            if (!img) return;
+
+            this.ctx.save();
+            this.ctx.translate(pos.x, pos.y);
+            this.ctx.rotate((item.rotation || 0) * Math.PI / 180);
+            this.ctx.drawImage(img, -img.width / 2, -img.height / 2);
+            this.ctx.restore();
+        });
+    }
+
+    // ---------------------------------------------------------
+    // DRAG GHOST
+    // ---------------------------------------------------------
+    drawGhost() {
+        if (!window.input || !window.input.draggingItem) return;
+
+        const draggingItem = window.input.draggingItem;
+        const mouse = window.input.mouse;
+
+        const iso = this.camera.screenToIso(mouse.x, mouse.y);
+        const tile = this.grid.snap(iso.x, iso.y);
+        const pos = this.grid.isoToScreen(tile.x, tile.y, this.camera);
+
+        const img = window.assets[draggingItem.icon];
         if (!img) return;
 
         this.ctx.save();
-        this.ctx.translate(x, y);
-        this.ctx.rotate((item.rotation || 0) * Math.PI / 180);
+        this.ctx.translate(pos.x, pos.y);
+        this.ctx.rotate((draggingItem.rotation || 0) * Math.PI / 180);
+        this.ctx.globalAlpha = 0.6;
         this.ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        this.ctx.restore();
+    }
+
+    // ---------------------------------------------------------
+    // DELETE PREVIEW
+    // ---------------------------------------------------------
+    drawDeletePreview() {
+        if (!window.input || !window.input.deleteMode) return;
+
+        const mouse = window.input.mouse;
+        const iso = this.camera.screenToIso(mouse.x, mouse.y);
+        const tile = this.grid.snap(iso.x, iso.y);
+
+        const pos = this.grid.isoToScreen(tile.x, tile.y, this.camera);
+
+        const w = this.tileW / 2;
+        const h = this.tileH / 2;
+
+        this.ctx.save();
+        this.ctx.strokeStyle = "rgba(255, 0, 0, 0.9)";
+        this.ctx.lineWidth = 3;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(pos.x, pos.y - h);
+        this.ctx.lineTo(pos.x + w, pos.y);
+        this.ctx.lineTo(pos.x, pos.y + h);
+        this.ctx.lineTo(pos.x - w, pos.y);
+        this.ctx.closePath();
+        this.ctx.stroke();
+
         this.ctx.restore();
     }
 
@@ -98,7 +162,7 @@ class Renderer {
         if (!this.grid.selectedTile) return;
 
         const { x, y } = this.grid.selectedTile;
-        const pos = this.camera.isoToScreen(x, y);
+        const pos = this.grid.isoToScreen(x, y, this.camera);
 
         const w = this.tileW / 2;
         const h = this.tileH / 2;
@@ -117,51 +181,4 @@ class Renderer {
 
         this.ctx.restore();
     }
-
-    // ---------------------------------------------------------
-    // PLACEMENT PREVIEW (green/red highlight)
-    // ---------------------------------------------------------
-    drawPreview() {
-        if (!window.placementpreview.active) return;
-
-        const { x, y, valid } = window.placementpreview;
-        const pos = this.camera.isoToScreen(x, y);
-
-        const w = this.tileW / 2;
-        const h = this.tileH / 2;
-
-        this.ctx.save();
-        this.ctx.strokeStyle = valid ? "lime" : "red";
-        this.ctx.lineWidth = 3;
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(pos.x, pos.y - h);
-        this.ctx.lineTo(pos.x + w, pos.y);
-        this.ctx.lineTo(pos.x, pos.y + h);
-        this.ctx.lineTo(pos.x - w, pos.y);
-        this.ctx.closePath();
-        this.ctx.stroke();
-
-        this.ctx.restore();
-    }
-
-    // ---------------------------------------------------------
-    // DRAGGING ITEM (ghost image)
-    // ---------------------------------------------------------
-    drawDraggingItem() {
-        const input = window.input;
-        if (!input || !input.draggingItem) return;
-
-        const item = input.draggingItem;
-        const img = window.assets.get(item.icon);
-        if (!img) return;
-
-        this.ctx.save();
-        this.ctx.translate(input.mouse.x, input.mouse.y);
-        this.ctx.rotate((item.rotation || 0) * Math.PI / 180);
-        this.ctx.globalAlpha = 0.7;
-        this.ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        this.ctx.restore();
-    }
 }
-
