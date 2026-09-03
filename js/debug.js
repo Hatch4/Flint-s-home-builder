@@ -44,7 +44,7 @@ class DebugOverlay {
         // Highlight hovered tile
         if (this.highlightTile) {
             const { x, y } = this.highlightTile;
-            const pos = this.game.renderer.isoToScreen(x, y);
+            const pos = this.game.camera.isoToScreen(x, y);
 
             ctx.strokeStyle = "rgba(255,0,0,0.8)";
             ctx.lineWidth = 3;
