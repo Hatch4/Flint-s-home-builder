@@ -24,7 +24,7 @@ window.onload = () => {
         game.debug = new DebugOverlay(game);
 
         document.getElementById("save-btn").addEventListener("click", () => {
-    const data = grid.serialize();
+    const data = game.grid.serialize();   // ⭐ FIXED
     const json = JSON.stringify(data);
 
     const blob = new Blob([json], { type: "application/json" });
@@ -37,7 +37,8 @@ window.onload = () => {
 
     URL.revokeObjectURL(url);
 });
-        document.getElementById("load-btn").addEventListener("click", () => {
+
+document.getElementById("load-btn").addEventListener("click", () => {
     document.getElementById("load-file").click();
 });
 
@@ -48,9 +49,9 @@ document.getElementById("load-file").addEventListener("change", (e) => {
     const reader = new FileReader();
     reader.onload = () => {
         const data = JSON.parse(reader.result);
-        grid.deserialize(data);
-        grid.undoStack = [];
-        grid.redoStack = [];
+        game.grid.deserialize(data);          
+        game.grid.undoStack = [];             
+        game.grid.redoStack = [];             
     };
     reader.readAsText(file);
 });
