@@ -14,10 +14,13 @@ window.onload = () => {
     game.renderer = new Renderer(canvas, game.grid, game.camera);
     game.input = new Input(canvas, game.grid, game.camera);
     game.items = Items;
-    game.ui = new UI(game);
-    game.save = new Save(game);
-    game.requirements = new Requirements(game);
+
+    game.save = new Save(game);               // ✔ load save BEFORE requirements
+    game.requirements = new Requirements(game); // ✔ requirements BEFORE UI
+    game.ui = new UI(game);                    // ✔ UI LAST
+
     game.debug = new DebugOverlay(game);
+
 
     // Load previous save
     game.save.load();
