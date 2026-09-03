@@ -114,7 +114,7 @@ class Input {
         if (!this.grid.isValidTile(tile.x, tile.y)) return;
 
         // Delete the tile contents
-        this.grid.removeItem(tile.x, tile.y);
+        this.grid.removeTopItem(tile.x, tile.y);
 
         // Clear preview + ghost
         window.placementpreview.clear();
@@ -187,7 +187,7 @@ class Input {
             const tile = this.grid.snap(iso.x, iso.y);
 
             if (this.grid.isValidTile(tile.x, tile.y)) {
-                this.grid.removeItem(tile.x, tile.y);
+                this.grid.removeTopItem(tile.x, tile.y);
             }
 
             window.placementpreview.clear();
