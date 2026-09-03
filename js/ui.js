@@ -1,33 +1,21 @@
 // UI.js
 class UI {
     constructor() {
-        this.tray = document.getElementById("tray");
-        this.createTrayButtons();
+        this.tray = document.getElementById("itemTray");
+        this.createButtons();
     }
 
-    // ---------------------------------------------------------
-    // CREATE ITEM BUTTONS
-    // ---------------------------------------------------------
-    createTrayButtons() {
+    createButtons() {
         for (const key in window.Items) {
             const item = window.Items[key];
 
             const btn = document.createElement("div");
-            btn.className = "tray-button";
+            btn.className = "itemButton";
 
-            // icon
             const img = document.createElement("img");
             img.src = "assets/" + item.icon;
-            img.className = "tray-icon";
             btn.appendChild(img);
 
-            // label
-            const label = document.createElement("div");
-            label.className = "tray-label";
-            label.innerText = key;
-            btn.appendChild(label);
-
-            // drag start
             btn.addEventListener("pointerdown", (e) => {
                 e.preventDefault();
                 window.input.startDraggingItem(item);
@@ -38,7 +26,4 @@ class UI {
     }
 }
 
-// Create UI
 window.ui = new UI();
-
-
