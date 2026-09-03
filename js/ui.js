@@ -22,6 +22,15 @@ class UI {
             });
 
             this.tray.appendChild(btn);
+            
+            // ROTATE BUTTON
+const rotateBtn = document.getElementById("rotateBtn");
+if (rotateBtn) {
+    rotateBtn.addEventListener("pointerdown", () => {
+        window.input.rotateCurrentItem();
+    });
+}
+
         }
     }
 }
