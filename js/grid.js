@@ -23,45 +23,47 @@ class Grid {
     }
 
     createEmptyTile() {
-    return {
-        floor: null,      // floor item
-        wall: null,       // wall item
-        roof: null,       // roof item
-        decor: [],        // multiple decor items
-        door: null,       // door item
-        window: null      // window item
-    };
-}
-place(x, y, item) {
-    const cell = this.get(x, y);
-    if (!cell) return;
-
-    switch (item.category) {
-        case "floor":
-            cell.floor = item;
-            break;
-
-        case "wall":
-            cell.wall = item;
-            break;
-
-        case "roof":
-            cell.roof = item;
-            break;
-
-        case "decor":
-            cell.decor.push(item);
-            break;
-
-        case "door":
-            cell.door = item;
-            break;
-
-        case "window":
-            cell.window = item;
-            break;
+        return {
+            floor: null,
+            wall: null,
+            roof: null,
+            decor: [],
+            door: null,
+            window: null
+        };
     }
-}
+
+    // ⭐ NEW unified placement system
+    place(x, y, item) {
+        const cell = this.get(x, y);
+        if (!cell) return;
+
+        switch (item.category) {
+            case "floor":
+                cell.floor = item;
+                break;
+
+            case "wall":
+                cell.wall = item;
+                break;
+
+            case "roof":
+                cell.roof = item;
+                break;
+
+            case "decor":
+                cell.decor.push(item);
+                break;
+
+            case "door":
+                cell.door = item;
+                break;
+
+            case "window":
+                cell.window = item;
+                break;
+        }
+    }
 
     // Select a tile (for highlighting)
     selectTile(x, y) {
@@ -78,13 +80,12 @@ place(x, y, item) {
         return x >= 0 && y >= 0 && x < this.width && y < this.height;
     }
 
-    // Place floor tile (stone slab)
+    // OLD placement functions — you can delete these later
     placeFloor(x, y) {
         if (!this.isValidTile(x, y)) return false;
 
         this.tiles[y][x].floor = true;
 
-        // Check if expansion is needed
         if (this.isEdgeTile(x, y)) {
             this.expandGrid(x, y);
         }
@@ -92,7 +93,6 @@ place(x, y, item) {
         return true;
     }
 
-    // Place wall tile
     placeWall(x, y, wallData) {
         if (!this.isValidTile(x, y)) return false;
 
@@ -100,7 +100,6 @@ place(x, y, item) {
         return true;
     }
 
-    // Place roof tile
     placeRoof(x, y) {
         if (!this.isValidTile(x, y)) return false;
 
@@ -108,7 +107,6 @@ place(x, y, item) {
         return true;
     }
 
-    // Place decor item
     placeDecor(x, y, decorData) {
         if (!this.isValidTile(x, y)) return false;
 
@@ -116,7 +114,6 @@ place(x, y, item) {
         return true;
     }
 
-    // Remove any item from tile
     removeItem(x, y) {
         if (!this.isValidTile(x, y)) return false;
 
@@ -124,7 +121,6 @@ place(x, y, item) {
         return true;
     }
 
-    // Check if tile is on the edge of the footprint
     isEdgeTile(x, y) {
         return (
             x === 0 ||
@@ -134,36 +130,30 @@ place(x, y, item) {
         );
     }
 
-    // Expand grid outward while keeping rectangular shape
     expandGrid(x, y) {
         let expandLeft = x === 0;
         let expandRight = x === this.width - 1;
         let expandTop = y === 0;
         let expandBottom = y === this.height - 1;
 
-        // Maximum size (can be changed later)
         const maxWidth = 10;
         const maxHeight = 8;
 
-        // Expand left
         if (expandLeft && this.width < maxWidth) {
             this.width++;
             this.addColumnLeft();
         }
 
-        // Expand right
         if (expandRight && this.width < maxWidth) {
             this.width++;
             this.addColumnRight();
         }
 
-        // Expand top
         if (expandTop && this.height < maxHeight) {
             this.height++;
             this.addRowTop();
         }
 
-        // Expand bottom
         if (expandBottom && this.height < maxHeight) {
             this.height++;
             this.addRowBottom();
@@ -198,7 +188,6 @@ place(x, y, item) {
         this.tiles.push(newRow);
     }
 
-    // For saving/loading
     serialize() {
         return {
             width: this.width,
