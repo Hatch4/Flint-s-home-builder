@@ -2,7 +2,7 @@
 class UI {
     constructor(game) {
         this.game = game;
-        this.bottomTray = document.getElementById("bottom-tray");
+        this.bottomTray = document.getElementById("itemTray");
 
         this.dragging = false;
         this.dragItemKey = null;
