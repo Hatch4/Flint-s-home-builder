@@ -62,7 +62,7 @@ html, body {
     opacity: 0;
     transform: translate(-50%, -50%);
     transition: opacity 0.15s ease-out;
-    z-index: 999;
+    z-index: 5;
 }
 
 #drag-ghost img {
