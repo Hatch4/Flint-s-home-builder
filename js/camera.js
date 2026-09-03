@@ -1,91 +1,120 @@
-// camera.js
+// Camera.js
 class Camera {
     constructor(grid, canvas) {
         this.grid = grid;
         this.canvas = canvas;
 
-        this.angle = 0;
-        this.swipeStartX = null;
-        this.swipeThreshold = 40;
+        // Camera position in screen space
+        this.x = canvas.width / 2;
+        this.y = 150;
 
-        this.tileWidth = 96;
-        this.tileHeight = 48;
+        // Zoom level
+        this.zoom = 1;
+
+        // Tile size (must match renderer)
+        this.tileW = 96;
+        this.tileH = 48;
+
+        // Dragging state
+        this.dragging = false;
+        this.lastX = 0;
+        this.lastY = 0;
+
+        // Touch pinch zoom
+        this.touchDistance = 0;
+
+        this.attachEvents();
     }
 
-    startSwipe(x) {
-        this.swipeStartX = x;
+    // ---------------------------------------------------------
+    // EVENT HANDLERS
+    // ---------------------------------------------------------
+    attachEvents() {
+        this.canvas.addEventListener("pointerdown", (e) => {
+            this.dragging = true;
+            this.lastX = e.clientX;
+            this.lastY = e.clientY;
+        });
+
+        this.canvas.addEventListener("pointermove", (e) => {
+            if (!this.dragging) return;
+
+            const dx = e.clientX - this.lastX;
+            const dy = e.clientY - this.lastY;
+
+            this.x += dx;
+            this.y += dy;
+
+            this.lastX = e.clientX;
+            this.lastY = e.clientY;
+        });
+
+        this.canvas.addEventListener("pointerup", () => {
+            this.dragging = false;
+        });
+
+        // Mouse wheel zoom
+        this.canvas.addEventListener("wheel", (e) => {
+            const oldZoom = this.zoom;
+
+            if (e.deltaY < 0) this.zoom *= 1.1;
+            else this.zoom *= 0.9;
+
+            this.zoom = Math.max(0.3, Math.min(3, this.zoom));
+
+            // Zoom toward cursor
+            const mx = e.clientX;
+            const my = e.clientY;
+
+            this.x = mx - (mx - this.x) * (this.zoom / oldZoom);
+            this.y = my - (my - this.y) * (this.zoom / oldZoom);
+        });
+
+        // Touch pinch zoom
+        this.canvas.addEventListener("touchmove", (e) => {
+            if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (this.touchDistance !== 0) {
+                    const scale = dist / this.touchDistance;
+                    this.zoom *= scale;
+                    this.zoom = Math.max(0.3, Math.min(3, this.zoom));
+                }
+
+                this.touchDistance = dist;
+            }
+        });
+
+        this.canvas.addEventListener("touchend", () => {
+            this.touchDistance = 0;
+        });
     }
 
-    endSwipe(x) {
-        if (this.swipeStartX === null) return;
+    // ---------------------------------------------------------
+    // ISO → SCREEN
+    // ---------------------------------------------------------
+    isoToScreen(ix, iy) {
+        const x = (ix - iy) * (this.tileW / 2);
+        const y = (ix + iy) * (this.tileH / 2);
 
-        const dx = x - this.swipeStartX;
-
-        if (dx > this.swipeThreshold) this.rotateClockwise();
-        else if (dx < -this.swipeThreshold) this.rotateCounterClockwise();
-
-        this.swipeStartX = null;
+        return {
+            x: this.x + x * this.zoom,
+            y: this.y + y * this.zoom
+        };
     }
 
-    rotateClockwise() {
-        this.angle = (this.angle + 90) % 360;
-    }
+    // ---------------------------------------------------------
+    // SCREEN → ISO
+    // ---------------------------------------------------------
+    screenToIso(sx, sy) {
+        const x = (sx - this.x) / this.zoom;
+        const y = (sy - this.y) / this.zoom;
 
-    rotateCounterClockwise() {
-        this.angle = (this.angle + 270) % 360;
-    }
+        const ix = (y / (this.tileH / 2) + x / (this.tileW / 2)) / 2;
+        const iy = (y / (this.tileH / 2) - x / (this.tileW / 2)) / 2;
 
-    isoToScreen(x, y) {
-        let rx = x;
-        let ry = y;
-
-        if (this.angle === 90) {
-            rx = this.grid.height - y - 1;
-            ry = x;
-        } else if (this.angle === 180) {
-            rx = this.grid.width - x - 1;
-            ry = this.grid.height - y - 1;
-        } else if (this.angle === 270) {
-            rx = y;
-            ry = this.grid.width - x - 1;
-        }
-
-        const w = this.tileWidth / 2;
-        const h = this.tileHeight / 2;
-
-        const gridPixelHeight = (this.grid.width + this.grid.height) * h;
-
-        const offsetX = this.canvas.width / 2;
-        const offsetY = (this.canvas.height - gridPixelHeight) / 2;
-
-        const screenX = (rx - ry) * w + offsetX;
-        const screenY = (rx + ry) * h + offsetY;
-
-        return { x: screenX, y: screenY };
-    }
-
-    screenToIso(screenX, screenY) {
-        const w = this.tileWidth / 2;
-        const h = this.tileHeight / 2;
-
-        const gridPixelHeight = (this.grid.width + this.grid.height) * h;
-
-        const offsetX = this.canvas.width / 2;
-        const offsetY = (this.canvas.height - gridPixelHeight) / 2;
-
-        const x = screenX - offsetX;
-        const y = screenY - offsetY;
-
-        const isoX = Math.floor((y / h + x / w) / 2);
-        const isoY = Math.floor((y / h - x / w) / 2);
-
-        if (
-            isoX < 0 ||
-            isoY < 0 ||
-            isoX >= this.grid.width ||
-            isoY >= this.grid.height
-        ) return null;
-
-        return { x: isoX, y: isoY };
+        return { x: ix, y: iy };
     }
 }
