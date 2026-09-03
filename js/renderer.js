@@ -22,30 +22,35 @@ class Renderer {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
+    // ---------------------------------------------------------
+    // MAIN RENDER LOOP
+    // ---------------------------------------------------------
     render() {
-    this.clear();
+        this.clear();
 
-    this.ctx.save();
-    this.ctx.translate(this.camera.x, this.camera.y);
-    this.ctx.scale(this.camera.zoom, this.camera.zoom);
+        this.ctx.save();
 
-    this.drawGrid();
-    this.drawTiles();
+        // Apply camera transform ONCE
+        this.ctx.translate(this.camera.x, this.camera.y);
+        this.ctx.scale(this.camera.zoom, this.camera.zoom);
 
-    if (window.placementpreview) {
-        window.placementpreview.draw(this.ctx, this.camera);
+        this.drawGrid();
+        this.drawTiles();
+
+        if (window.placementpreview) {
+            window.placementpreview.draw(this.ctx, this.camera);
+        }
+
+        if (window.animation) {
+            window.animation.draw(this.ctx, this.camera);
+        }
+
+        this.drawGhost();
+        this.drawDeletePreview();
+        this.drawSelection();
+
+        this.ctx.restore();
     }
-
-    if (window.animation) {
-        window.animation.draw(this.ctx, this.camera);
-    }
-
-    this.drawGhost();
-    this.drawDeletePreview();
-    this.drawSelection();
-
-    this.ctx.restore();
-}
 
     // ---------------------------------------------------------
     // DRAW GRID (debug)
@@ -59,7 +64,7 @@ class Renderer {
 
         for (let y = 0; y < this.grid.height; y++) {
             for (let x = 0; x < this.grid.width; x++) {
-                const pos = this.grid.isoToScreen(x, y, this.camera);
+                const pos = this.grid.isoToScreen(x, y);
 
                 const w = this.tileW / 2;
                 const h = this.tileH / 2;
@@ -91,31 +96,31 @@ class Renderer {
         }
     }
 
-   drawTileStack(x, y, cell) {
-    const pos = this.grid.isoToScreen(x, y, this.camera);
+    drawTileStack(x, y, cell) {
+        const pos = this.grid.isoToScreen(x, y);
 
-    const drawItem = (item) => {
-        if (!item) return;
-        const img = window.assets[item.icon];
-        if (!img) return;
+        const drawItem = (item) => {
+            if (!item) return;
+            const img = window.assets[item.icon];
+            if (!img) return;
 
-        this.ctx.save();
-        this.ctx.translate(pos.x, pos.y);
-        this.ctx.rotate((item.rotation || 0) * Math.PI / 180);
-        this.ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        this.ctx.restore();
-    };
+            this.ctx.save();
+            this.ctx.translate(pos.x, pos.y);
+            this.ctx.rotate((item.rotation || 0) * Math.PI / 180);
+            this.ctx.drawImage(img, -img.width / 2, -img.height / 2);
+            this.ctx.restore();
+        };
 
-    // Draw in correct order
-    drawItem(cell.floor);
-    drawItem(cell.wall);
-    drawItem(cell.roof);
+        // Correct draw order
+        drawItem(cell.floor);
+        drawItem(cell.wall);
+        drawItem(cell.roof);
 
-    cell.decor.forEach(drawItem);
+        cell.decor.forEach(drawItem);
 
-    drawItem(cell.door);
-    drawItem(cell.window);
-}
+        drawItem(cell.door);
+        drawItem(cell.window);
+    }
 
     // ---------------------------------------------------------
     // DRAG GHOST
@@ -128,7 +133,7 @@ class Renderer {
 
         const iso = this.camera.screenToIso(mouse.x, mouse.y);
         const tile = this.grid.snap(iso.x, iso.y);
-        const pos = this.grid.isoToScreen(tile.x, tile.y, this.camera);
+        const pos = this.grid.isoToScreen(tile.x, tile.y);
 
         const img = window.assets[draggingItem.icon];
         if (!img) return;
@@ -151,7 +156,7 @@ class Renderer {
         const iso = this.camera.screenToIso(mouse.x, mouse.y);
         const tile = this.grid.snap(iso.x, iso.y);
 
-        const pos = this.grid.isoToScreen(tile.x, tile.y, this.camera);
+        const pos = this.grid.isoToScreen(tile.x, tile.y);
 
         const w = this.tileW / 2;
         const h = this.tileH / 2;
@@ -178,7 +183,7 @@ class Renderer {
         if (!this.grid.selectedTile) return;
 
         const { x, y } = this.grid.selectedTile;
-        const pos = this.grid.isoToScreen(x, y, this.camera);
+        const pos = this.grid.isoToScreen(x, y);
 
         const w = this.tileW / 2;
         const h = this.tileH / 2;
