@@ -35,14 +35,10 @@ class Camera {
         this.angle = (this.angle + 270) % 360;
     }
 
-    // ---------------------------------------------------------
-    // Convert ISO tile coords → screen coords
-    // ---------------------------------------------------------
     isoToScreen(x, y) {
         let rx = x;
         let ry = y;
 
-        // rotation
         if (this.angle === 90) {
             rx = this.grid.height - y - 1;
             ry = x;
@@ -54,30 +50,25 @@ class Camera {
             ry = this.grid.width - x - 1;
         }
 
-        const tileWidth = this.tileWidth;
-        const tileHeight = this.tileHeight;
+        const w = this.tileWidth / 2;
+        const h = this.tileHeight / 2;
 
-        const gridPixelHeight =
-            (this.grid.width + this.grid.height) * (tileHeight / 2);
+        const gridPixelHeight = (this.grid.width + this.grid.height) * h;
 
         const offsetX = this.canvas.width / 2;
         const offsetY = (this.canvas.height - gridPixelHeight) / 2;
 
-        const screenX = (rx - ry) * (tileWidth / 2) + offsetX;
-        const screenY = (rx + ry) * (tileHeight / 2) + offsetY;
+        const screenX = (rx - ry) * w + offsetX;
+        const screenY = (rx + ry) * h + offsetY;
 
         return { x: screenX, y: screenY };
     }
 
-    // ---------------------------------------------------------
-    // Convert screen coords → ISO tile coords
-    // ---------------------------------------------------------
     screenToIso(screenX, screenY) {
-        const tileWidth = this.tileWidth;
-        const tileHeight = this.tileHeight;
+        const w = this.tileWidth / 2;
+        const h = this.tileHeight / 2;
 
-        const gridPixelHeight =
-            (this.grid.width + this.grid.height) * (tileHeight / 2);
+        const gridPixelHeight = (this.grid.width + this.grid.height) * h;
 
         const offsetX = this.canvas.width / 2;
         const offsetY = (this.canvas.height - gridPixelHeight) / 2;
@@ -85,20 +76,15 @@ class Camera {
         const x = screenX - offsetX;
         const y = screenY - offsetY;
 
-        const isoX = Math.floor(
-            (y / (tileHeight / 2) + x / (tileWidth / 2)) / 2
-        );
-        const isoY = Math.floor(
-            (y / (tileHeight / 2) - x / (tileWidth / 2)) / 2
-        );
+        const isoX = Math.floor((y / h + x / w) / 2);
+        const isoY = Math.floor((y / h - x / w) / 2);
 
         if (
             isoX < 0 ||
             isoY < 0 ||
             isoX >= this.grid.width ||
             isoY >= this.grid.height
-        )
-            return null;
+        ) return null;
 
         return { x: isoX, y: isoY };
     }
