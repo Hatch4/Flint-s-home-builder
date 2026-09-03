@@ -20,7 +20,8 @@ window.onload = () => {
         game.save = new Save(game);                 // load save BEFORE requirements
         game.requirements = new Requirements(game); // requirements BEFORE UI
         game.placementrules = new placementrules(game);
-        window.placementrules = game.placementrules;
+       // placementrules is already defined as a plain object in PlacementRules.js
+        // No instantiation needed.
         game.ui = new UI(game);                     // UI LAST
 
         game.debug = new DebugOverlay(game);
