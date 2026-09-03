@@ -23,23 +23,29 @@ class Renderer {
     }
 
     render() {
-        this.clear();
+    this.clear();
 
-        this.drawGrid();
-        this.drawTiles();
+    this.ctx.save();
+    this.ctx.translate(this.camera.x, this.camera.y);
+    this.ctx.scale(this.camera.zoom, this.camera.zoom);
 
-        if (window.placementpreview) {
-            window.placementpreview.draw(this.ctx, this.camera);
-        }
+    this.drawGrid();
+    this.drawTiles();
 
-        if (window.animation) {
-            window.animation.draw(this.ctx, this.camera);
-        }
-
-        this.drawGhost();
-        this.drawDeletePreview();
-        this.drawSelection();
+    if (window.placementpreview) {
+        window.placementpreview.draw(this.ctx, this.camera);
     }
+
+    if (window.animation) {
+        window.animation.draw(this.ctx, this.camera);
+    }
+
+    this.drawGhost();
+    this.drawDeletePreview();
+    this.drawSelection();
+
+    this.ctx.restore();
+}
 
     // ---------------------------------------------------------
     // DRAW GRID (debug)
