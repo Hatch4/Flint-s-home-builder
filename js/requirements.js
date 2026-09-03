@@ -69,6 +69,10 @@ class Requirements {
 
         return Math.floor((totalMet / totalRequired) * 100);
     }
+    getPercent() {
+    const counts = this.countPieces();
+    return this.calculateProgress(counts);
+}
 
     // ---------------------------------------------------------
     // Update progress + check for completion
