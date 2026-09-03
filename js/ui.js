@@ -26,7 +26,6 @@ class UI {
 
             el.appendChild(img);
 
-            // Enable dragging
             el.addEventListener("pointerdown", (e) => this.startDrag(e, key));
 
             this.bottomTray.appendChild(el);
