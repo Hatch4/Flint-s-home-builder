@@ -31,32 +31,33 @@ class Camera {
     }
 
     isoToScreen(x, y) {
-        const tileWidth = 96;
-        const tileHeight = 48;
+    const tileWidth = 96;
+    const tileHeight = 48;
 
-        let rx = x;
-        let ry = y;
+    let rx = x;
+    let ry = y;
 
-        // rotation
-        if (this.angle === 90) {
-            rx = this.grid.height - y - 1;
-            ry = x;
-        } else if (this.angle === 180) {
-            rx = this.grid.width - x - 1;
-            ry = this.grid.height - y - 1;
-        } else if (this.angle === 270) {
-            rx = y;
-            ry = this.grid.width - x - 1;
-        }
+    // rotation
+    if (this.angle === 90) {
+        rx = this.grid.height - y - 1;
+        ry = x;
+    } else if (this.angle === 180) {
+        rx = this.grid.width - x - 1;
+        ry = this.grid.height - y - 1;
+    } else if (this.angle === 270) {
+        rx = y;
+        ry = this.grid.width - x - 1;
+    }
 
-        // ⭐ center grid WITHOUT window.game
-        const totalHeight = this.grid.height * tileHeight / 2;
-        const offsetX = window.innerWidth / 2;
-        const offsetY = window.innerHeight / 2 - totalHeight / 2;
+    // ⭐ Perfect centering math
+    const gridPixelHeight = (this.grid.width + this.grid.height) * (tileHeight / 2);
 
-        const screenX = (rx - ry) * (tileWidth / 2) + offsetX;
-        const screenY = (rx + ry) * (tileHeight / 2) + offsetY;
+    const offsetX = this.canvas.width / 2;
+    const offsetY = (this.canvas.height - gridPixelHeight) / 2;
 
-        return { x: screenX, y: screenY };
+    const screenX = (rx - ry) * (tileWidth / 2) + offsetX;
+    const screenY = (rx + ry) * (tileHeight / 2) + offsetY;
+
+    return { x: screenX, y: screenY };
     }
 }
