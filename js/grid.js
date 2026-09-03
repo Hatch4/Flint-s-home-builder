@@ -1,17 +1,44 @@
 // grid.js
 class Grid {
     constructor(startWidth = 5, startHeight = 4) {
-        this.width = startWidth;
-        this.height = startHeight;
+    this.width = startWidth;
+    this.height = startHeight;
 
-        this.tileW = 96;
-        this.tileH = 48;
+    this.tileW = 96;
+    this.tileH = 48;
 
-        this.tiles = [];
-        this.selectedTile = null;
+    this.tiles = [];
+    this.selectedTile = null;
 
-        this.initTiles();
-    }
+    this.undoStack = [];   
+    this.redoStack = [];   
+
+    this.initTiles();
+}
+    saveState() {
+    const snapshot = JSON.stringify(this.serialize());
+    this.undoStack.push(snapshot);
+    this.redoStack = []; // clear redo on new action
+}
+undo() {
+    if (this.undoStack.length === 0) return;
+
+    const snapshot = this.undoStack.pop();
+    this.redoStack.push(JSON.stringify(this.serialize()));
+
+    const data = JSON.parse(snapshot);
+    this.deserialize(data);
+}
+
+redo() {
+    if (this.redoStack.length === 0) return;
+
+    const snapshot = this.redoStack.pop();
+    this.undoStack.push(JSON.stringify(this.serialize()));
+
+    const data = JSON.parse(snapshot);
+    this.deserialize(data);
+}
 
     // Create initial grid
     initTiles() {
