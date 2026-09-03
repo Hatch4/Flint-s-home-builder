@@ -95,6 +95,7 @@ class Input {
         const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
 
         if (valid) {
+            this.grid.saveState();  
             this.grid.place(tile.x, tile.y, this.draggingItem);
             window.animation.spawnDust(tile.x, tile.y);
         }
@@ -114,6 +115,7 @@ class Input {
         if (!this.grid.isValidTile(tile.x, tile.y)) return;
 
         // Delete the tile contents
+        this.grid.saveState(); 
         this.grid.removeTopItem(tile.x, tile.y);
         window.animation.spawnDust(tile.x, tile.y);
         window.assets.deleteSound?.play();
@@ -129,6 +131,14 @@ class Input {
         if (e.key === "r" || e.key === "R") {
             this.rotateItem();
         }
+        if (e.ctrlKey && e.key === "z") {
+    this.grid.undo();
+}
+
+if (e.ctrlKey && e.key === "y") {
+    this.grid.redo();
+}
+
     }
 
     onWheel(e) {
