@@ -1,11 +1,15 @@
 // camera.js
 class Camera {
     constructor(grid, canvas) {
-        this.grid = grid;  
+        this.grid = grid;
         this.canvas = canvas;
+
         this.angle = 0;
         this.swipeStartX = null;
         this.swipeThreshold = 40;
+
+        this.tileWidth = 96;
+        this.tileHeight = 48;
     }
 
     startSwipe(x) {
@@ -31,50 +35,71 @@ class Camera {
         this.angle = (this.angle + 270) % 360;
     }
 
+    // ---------------------------------------------------------
+    // Convert ISO tile coords → screen coords
+    // ---------------------------------------------------------
     isoToScreen(x, y) {
-    const tileWidth = 96;
-    const tileHeight = 48;
+        let rx = x;
+        let ry = y;
 
-    let rx = x;
-    let ry = y;
+        // rotation
+        if (this.angle === 90) {
+            rx = this.grid.height - y - 1;
+            ry = x;
+        } else if (this.angle === 180) {
+            rx = this.grid.width - x - 1;
+            ry = this.grid.height - y - 1;
+        } else if (this.angle === 270) {
+            rx = y;
+            ry = this.grid.width - x - 1;
+        }
 
-    // rotation
-    if (this.angle === 90) {
-        rx = this.grid.height - y - 1;
-        ry = x;
-    } else if (this.angle === 180) {
-        rx = this.grid.width - x - 1;
-        ry = this.grid.height - y - 1;
-    } else if (this.angle === 270) {
-        rx = y;
-        ry = this.grid.width - x - 1;
+        const tileWidth = this.tileWidth;
+        const tileHeight = this.tileHeight;
+
+        const gridPixelHeight =
+            (this.grid.width + this.grid.height) * (tileHeight / 2);
+
+        const offsetX = this.canvas.width / 2;
+        const offsetY = (this.canvas.height - gridPixelHeight) / 2;
+
+        const screenX = (rx - ry) * (tileWidth / 2) + offsetX;
+        const screenY = (rx + ry) * (tileHeight / 2) + offsetY;
+
+        return { x: screenX, y: screenY };
     }
-        screenToIso(screenX, screenY) {
-    const offsetX = this.canvas.width / 2;
-    const gridPixelHeight = (this.grid.width + this.grid.height) * (this.tileHeight / 2);
-    const offsetY = (this.canvas.height - gridPixelHeight) / 2;
 
-    const x = screenX - offsetX;
-    const y = screenY - offsetY;
+    // ---------------------------------------------------------
+    // Convert screen coords → ISO tile coords
+    // ---------------------------------------------------------
+    screenToIso(screenX, screenY) {
+        const tileWidth = this.tileWidth;
+        const tileHeight = this.tileHeight;
 
-    const isoX = Math.floor((y / (this.tileHeight / 2) + x / (this.tileWidth / 2)) / 2);
-    const isoY = Math.floor((y / (this.tileHeight / 2) - x / (this.tileWidth / 2)) / 2);
+        const gridPixelHeight =
+            (this.grid.width + this.grid.height) * (tileHeight / 2);
 
-    if (isoX < 0 || isoY < 0 || isoX >= this.grid.width || isoY >= this.grid.height)
-        return null;
+        const offsetX = this.canvas.width / 2;
+        const offsetY = (this.canvas.height - gridPixelHeight) / 2;
 
-    return { x: isoX, y: isoY };
-}
+        const x = screenX - offsetX;
+        const y = screenY - offsetY;
 
-    // ⭐ Perfect centering math
-    const gridPixelHeight = (this.grid.width + this.grid.height) * (tileHeight / 2);
+        const isoX = Math.floor(
+            (y / (tileHeight / 2) + x / (tileWidth / 2)) / 2
+        );
+        const isoY = Math.floor(
+            (y / (tileHeight / 2) - x / (tileWidth / 2)) / 2
+        );
 
-    const offsetX = this.canvas.width / 2;
-    const offsetY = (this.canvas.height - gridPixelHeight) / 2;
+        if (
+            isoX < 0 ||
+            isoY < 0 ||
+            isoX >= this.grid.width ||
+            isoY >= this.grid.height
+        )
+            return null;
 
-    const screenX = (rx - ry) * (tileWidth / 2) + offsetX;
-    const screenY = (rx + ry) * (tileHeight / 2) + offsetY;
-
-    return { x: screenX, y: screenY };
+        return { x: isoX, y: isoY };
     }
 }
