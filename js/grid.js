@@ -97,16 +97,12 @@ class Grid {
     }
 
     // ---------------------------------------------------------
-    // ISO → SCREEN
+    // ISO → SCREEN (NO CAMERA TRANSFORM HERE)
     // ---------------------------------------------------------
-    isoToScreen(x, y, camera) {
-        const screenX =
-            (x - y) * (this.tileW / 2) * camera.zoom + camera.x;
-
-        const screenY =
-            (x + y) * (this.tileH / 2) * camera.zoom + camera.y;
-
-        return { x: screenX, y: screenY };
+    isoToScreen(x, y) {
+        const sx = (x - y) * (this.tileW / 2);
+        const sy = (x + y) * (this.tileH / 2);
+        return { x: sx, y: sy };
     }
 
     // ---------------------------------------------------------
@@ -211,4 +207,3 @@ class Grid {
         this.tiles = data.tiles;
     }
 }
-
