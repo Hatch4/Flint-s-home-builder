@@ -5,11 +5,11 @@ class Camera {
         this.canvas = canvas;
 
         // Camera position in world space
-        this.x = 300;     // good default center
-        this.y = 150;     // good default height
+        this.x = 300;
+        this.y = 150;
 
         // Zoom level
-        this.zoom = 0.35; // perfect for your Flint + grid
+        this.zoom = 0.35;
 
         // Tile size (must match renderer)
         this.tileW = 96;
@@ -26,9 +26,6 @@ class Camera {
         this.attachEvents();
     }
 
-    // ---------------------------------------------------------
-    // EVENT HANDLERS
-    // ---------------------------------------------------------
     attachEvents() {
         // PAN
         this.canvas.addEventListener("pointerdown", (e) => {
@@ -54,7 +51,7 @@ class Camera {
             this.dragging = false;
         });
 
-        // ZOOM (mouse wheel)
+        // ZOOM
         this.canvas.addEventListener("wheel", (e) => {
             const oldZoom = this.zoom;
 
@@ -94,7 +91,7 @@ class Camera {
     }
 
     // ---------------------------------------------------------
-    // ISO → SCREEN (camera transform happens in renderer)
+    // ISO → SCREEN (NO CAMERA TRANSFORM HERE)
     // ---------------------------------------------------------
     isoToScreen(ix, iy) {
         const x = (ix - iy) * (this.tileW / 2);
@@ -106,7 +103,6 @@ class Camera {
     // SCREEN → ISO (convert screen → camera space)
     // ---------------------------------------------------------
     screenToIso(sx, sy) {
-        // Convert screen → camera space
         const cx = (sx - this.x) / this.zoom;
         const cy = (sy - this.y) / this.zoom;
 
