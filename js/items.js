@@ -16,7 +16,7 @@ const Items = {
     "wood_wall": {
         name: "Wooden Wall Panel",
         category: "wall",
-        icon: "assets/items/wall.png"
+        icon: "assets/items/wall.png",
         rotation: 0   // NEW
     },
 
@@ -26,7 +26,7 @@ const Items = {
     "wood_door": {
         name: "Wooden Door",
         category: "door",
-        icon: "assets/items/door.png"
+        icon: "assets/items/door.png",
         rotation: 0   // NEW
     },
 
@@ -36,7 +36,7 @@ const Items = {
     "bubble_window": {
         name: "Bubble Glass Window",
         category: "window",
-        icon: "assets/items/window.png"
+        icon: "assets/items/window.png",
         rotation: 0   // NEW
     },
 
@@ -46,7 +46,7 @@ const Items = {
     "reed_roof": {
         name: "Woven Reed Roof Tile",
         category: "roof",
-        icon: "assets/items/roof.png"
+        icon: "assets/items/roof.png",
         rotation: 0   // NEW
     },
 
@@ -57,7 +57,7 @@ const Items = {
         name: "Glowing Mushroom Torch",
         category: "decor",
         type: "mushroom",
-        icon: "assets/items/mushroom.png"
+        icon: "assets/items/mushroom.png",
         rotation: 0   // NEW
     },
 
@@ -67,7 +67,7 @@ const Items = {
     "lantern_friendship": {
         name: "Lantern of Friendship",
         category: "lantern",
-        icon: "assets/items/lantern.png"
+        icon: "assets/items/lantern.png",
         rotation: 0   // NEW
     }
 };
