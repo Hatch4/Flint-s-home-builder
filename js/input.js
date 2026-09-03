@@ -9,143 +9,37 @@ class Input {
         this.dragX = 0;
         this.dragY = 0;
 
-        this.pointerDown = false;
-
-        this.bindEvents();
-    }
-
-    bindEvents() {
-        // Use pointer events for both mouse + touch
-        this.canvas.addEventListener("pointerdown", (e) => this.onPointerDown(e));
-        this.canvas.addEventListener("pointermove", (e) => this.onPointerMove(e));
-        this.canvas.addEventListener("pointerup", (e) => this.onPointerUp(e));
-        this.canvas.addEventListener("pointercancel", (e) => this.onPointerUp(e));
-    }
-
-    getPos(e) {
-        return {
-            x: e.clientX,
-            y: e.clientY
-        };
+        canvas.addEventListener("pointerdown", (e) => this.onPointerDown(e));
     }
 
     onPointerDown(e) {
-        this.pointerDown = true;
+        // Canvas click (not tray)
+        const tile = this.camera.screenToIso(e.clientX, e.clientY);
+        if (!tile) return;
 
-        const pos = this.getPos(e);
-
-        // Start swipe detection
-        this.camera.startSwipe(pos.x);
-
-        // Check tile hit
-        const tile = this.getTileAt(pos.x, pos.y);
-        if (tile) {
-            document.dispatchEvent(new CustomEvent("tile-hover", { detail: tile }));
-            this.grid.selectTile(tile.x, tile.y);
-            return;
-        }
-
-        // Check tray hit
-        const trayItem = this.checkTrayHit(pos.x, pos.y);
-        if (trayItem) {
-            this.draggingItem = Items[trayItem];
-            this.dragX = pos.x;
-            this.dragY = pos.y;
-            return;
-        }
-
-        // Clear selection
-        this.grid.clearSelection();
+        this.grid.selected = tile;
     }
 
-    onPointerMove(e) {
-        if (!this.pointerDown) return;
-
-        const pos = this.getPos(e);
-
-        // Tile hover
-        const tile = this.getTileAt(pos.x, pos.y);
-        if (tile) {
-            document.dispatchEvent(new CustomEvent("tile-hover", { detail: tile }));
-        }
-
-        // Dragging item
-        if (this.draggingItem) {
-            this.dragX = pos.x;
-            this.dragY = pos.y;
-        }
+    handleDragMove(x, y, item) {
+        this.draggingItem = item;
+        this.dragX = x;
+        this.dragY = y;
     }
 
-    onPointerUp(e) {
-        const pos = this.getPos(e);
+    handleDragEnd(x, y, item) {
+        this.draggingItem = item;
 
-        // End swipe
-        this.camera.endSwipe(pos.x);
+        this.attemptPlacementAtScreen(x, y, item);
 
-        // Placement
-        if (this.draggingItem) {
-            const tile = this.getTileAt(pos.x, pos.y);
-
-            if (tile) {
-                Placement.attemptPlacement(
-                    this.grid,
-                    tile.x,
-                    tile.y,
-                    this.draggingItem
-                );
-            }
-
-            this.draggingItem = null;
-        }
-
-        this.pointerDown = false;
+        this.draggingItem = null;
     }
 
-    // Convert screen → tile
-    getTileAt(screenX, screenY) {
-        const tileWidth = 96;
-        const tileHeight = 48;
+    attemptPlacementAtScreen(screenX, screenY, item) {
+        const tile = this.camera.screenToIso(screenX, screenY);
+        if (!tile) return;
 
-        for (let y = 0; y < this.grid.height; y++) {
-            for (let x = 0; x < this.grid.width; x++) {
+        this.grid.selected = tile;
 
-                const pos = this.isoToScreen(x, y);
-
-                const dx = screenX - pos.x;
-                const dy = screenY - pos.y;
-
-                // Correct diamond hit detection
-                const inside =
-                    Math.abs(dx) / (tileWidth / 2) +
-                    Math.abs(dy) / (tileHeight / 2) <= 1;
-
-                if (inside) {
-                    return { x, y };
-                }
-            }
-        }
-
-        return null;
-    }
-
-    isoToScreen(x, y) {
-        return this.camera.isoToScreen(x, y);
-    }
-
-    // Bottom tray hit detection
-    checkTrayHit(x, y) {
-        const tray = document.getElementById("bottom-tray");
-        const rect = tray.getBoundingClientRect();
-
-        if (y < rect.top || y > rect.bottom) return null;
-
-        for (let el of tray.children) {
-            const r = el.getBoundingClientRect();
-            if (x >= r.left && x <= r.right) {
-                return el.dataset.item;
-            }
-        }
-
-        return null;
+        this.grid.placeItem(tile.x, tile.y, item);
     }
 }
