@@ -21,7 +21,7 @@ class DebugOverlay {
         for (let y = 0; y < this.game.grid.height; y++) {
             for (let x = 0; x < this.game.grid.width; x++) {
 
-                const pos = this.game.renderer.isoToScreen(x, y);
+                const pos = this.game.camera.isoToScreen(x, y);
 
                 ctx.strokeStyle = "rgba(0,255,0,0.4)";
                 ctx.lineWidth = 2;
