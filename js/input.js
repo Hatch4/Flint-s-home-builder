@@ -13,6 +13,9 @@ class Input {
         this.deleteMode = false;
         this.interiorMode = false;
 
+        // ⭐ FIX: make input globally available immediately
+        window.input = this;
+
         this.bindEvents();
     }
 
@@ -147,7 +150,6 @@ class Input {
     // ---------------------------------------------------------
     startDraggingItem(item) {
         this.draggingItem = { ...item, rotation: 0 };
-        window.input = this;
     }
 
     // ---------------------------------------------------------
