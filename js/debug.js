@@ -2,64 +2,80 @@
 class DebugOverlay {
     constructor(game) {
         this.game = game;
-        this.enabled = true;
-        this.highlightTile = null;
 
-        // Listen for tile selection updates
-        document.addEventListener("tile-hover", (e) => {
-            this.highlightTile = e.detail;
+        this.fps = 0;
+        this.lastTime = performance.now();
+        this.frameCount = 0;
+
+        this.mouseIso = { x: 0, y: 0 };
+        this.mouseTile = { x: 0, y: 0 };
+
+        this.bindMouseTracking();
+    }
+
+    // ---------------------------------------------------------
+    // Track mouse → iso → tile
+    // ---------------------------------------------------------
+    bindMouseTracking() {
+        window.addEventListener("pointermove", (e) => {
+            const iso = this.game.camera.screenToIso(e.clientX, e.clientY);
+            this.mouseIso = iso;
+
+            const snapped = this.game.grid.snap(iso.x, iso.y);
+            this.mouseTile = snapped;
         });
     }
 
-    draw(ctx) {
-        if (!this.enabled) return;
+    // ---------------------------------------------------------
+    // FPS CALCULATION
+    // ---------------------------------------------------------
+    updateFPS() {
+        const now = performance.now();
+        this.frameCount++;
 
-        const tileWidth = 96;
-        const tileHeight = 48;
-        const w = tileWidth / 2;
-        const h = tileHeight / 2;
-
-        // Draw tile boundaries
-        for (let y = 0; y < this.game.grid.height; y++) {
-            for (let x = 0; x < this.game.grid.width; x++) {
-
-                // Use camera for correct isometric projection
-                const pos = this.game.camera.isoToScreen(x, y);
-
-                ctx.strokeStyle = "rgba(0,255,0,0.4)";
-                ctx.lineWidth = 2;
-
-                // MATCH renderer.js diamond geometry EXACTLY
-                ctx.beginPath();
-                ctx.moveTo(pos.x, pos.y - h);
-                ctx.lineTo(pos.x + w, pos.y);
-                ctx.lineTo(pos.x, pos.y + h);
-                ctx.lineTo(pos.x - w, pos.y);
-                ctx.closePath();
-                ctx.stroke();
-
-                // Draw coordinates
-                ctx.fillStyle = "rgba(0,255,0,0.7)";
-                ctx.font = "14px Arial";
-                ctx.fillText(`${x},${y}`, pos.x - 10, pos.y + h + 16);
-            }
-        }
-
-        // Highlight hovered tile
-        if (this.highlightTile) {
-            const { x, y } = this.highlightTile;
-            const pos = this.game.camera.isoToScreen(x, y);
-
-            ctx.strokeStyle = "rgba(255,0,0,0.8)";
-            ctx.lineWidth = 3;
-
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y - h);
-            ctx.lineTo(pos.x + w, pos.y);
-            ctx.lineTo(pos.x, pos.y + h);
-            ctx.lineTo(pos.x - w, pos.y);
-            ctx.closePath();
-            ctx.stroke();
+        if (now - this.lastTime >= 1000) {
+            this.fps = this.frameCount;
+            this.frameCount = 0;
+            this.lastTime = now;
         }
     }
+
+    // ---------------------------------------------------------
+    // DRAW DEBUG OVERLAY
+    // ---------------------------------------------------------
+    draw(ctx) {
+        this.updateFPS();
+
+        ctx.save();
+
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
+        ctx.fillRect(10, 10, 220, 110);
+
+        ctx.fillStyle = "#00ff00";
+        ctx.font = "14px Arial";
+
+        ctx.fillText(`FPS: ${this.fps}`, 20, 35);
+
+        ctx.fillText(
+            `ISO: ${this.mouseIso.x.toFixed(2)}, ${this.mouseIso.y.toFixed(2)}`,
+            20,
+            60
+        );
+
+        ctx.fillText(
+            `Tile: ${this.mouseTile.x}, ${this.mouseTile.y}`,
+            20,
+            85
+        );
+
+        ctx.fillText(
+            `Camera: x=${this.game.camera.x.toFixed(2)} y=${this.game.camera.y.toFixed(2)} zoom=${this.game.camera.zoom.toFixed(2)}`,
+            20,
+            110
+        );
+
+        ctx.restore();
+    }
 }
+
+window.DebugOverlay = DebugOverlay;
