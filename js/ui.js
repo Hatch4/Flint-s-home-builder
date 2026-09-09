@@ -104,20 +104,30 @@ class UI {
             window.saveSystem.loadFromFile(e.target.files[0]);
         });
 
-        // DRAG GHOST FOLLOW MOUSE
-        window.addEventListener("pointermove", (e) => {
-            if (!window.input.draggingItem) {
-                this.dragGhost.style.opacity = 0;
-                return;
-            }
+       // DRAG GHOST FOLLOW POINTER
+window.addEventListener("pointermove", (e) => {
+    const dragging = window.input.draggingItem;
 
-            const item = window.input.draggingItem;
-            this.dragGhost.innerHTML = `<img src="assets/${item.icon}" style="width:64px;height:64px;">`;
+    if (!dragging) {
+        this.dragGhost.style.opacity = 0;
+        return;
+    }
 
-            this.dragGhost.style.left = e.clientX + "px";
-            this.dragGhost.style.top = e.clientY + "px";
-            this.dragGhost.style.opacity = 1;
-        });
+    // Update ghost icon
+    this.dragGhost.innerHTML =
+        `<img src="assets/${dragging.icon}" style="width:64px;height:64px;">`;
+
+    // Follow pointer
+    this.dragGhost.style.left = `${e.clientX}px`;
+    this.dragGhost.style.top = `${e.clientY}px`;
+    this.dragGhost.style.opacity = 1;
+});
+
+// HIDE GHOST ON DRAG END
+window.addEventListener("pointerup", () => {
+    this.dragGhost.style.opacity = 0;
+});
+
 
         window.addEventListener("pointerup", () => {
             this.dragGhost.style.opacity = 0;
