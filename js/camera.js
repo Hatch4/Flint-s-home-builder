@@ -1,31 +1,30 @@
 // camera.js
 class Camera {
     constructor(grid, canvas) {
-        this.grid = grid;
-        this.canvas = canvas;
+    this.grid = grid;
+    this.canvas = canvas;
 
-        // Camera position in screen space
-        this.x = canvas.width / 2 - (this.grid.width * this.tileW) / 4;
-        this.y = canvas.height / 2 - (this.grid.height * this.tileH) / 4;
+    // Tile size (must match renderer)
+    this.tileW = 96;
+    this.tileH = 48;
 
+    // Camera position in screen space (center grid)
+    this.x = canvas.width / 2 - (this.grid.width * this.tileW) / 4;
+    this.y = canvas.height / 2 - (this.grid.height * this.tileH) / 4;
 
-        // Zoom level
-        this.zoom = 1;
+    // Zoom level
+    this.zoom = 1;
 
-        // Tile size (must match renderer)
-        this.tileW = 96;
-        this.tileH = 48;
+    // Dragging state
+    this.dragging = false;
+    this.lastX = 0;
+    this.lastY = 0;
 
-        // Dragging state
-        this.dragging = false;
-        this.lastX = 0;
-        this.lastY = 0;
+    // Touch pinch zoom
+    this.touchDistance = 0;
 
-        // Touch pinch zoom
-        this.touchDistance = 0;
-
-        this.attachEvents();
-    }
+    this.attachEvents();
+}
 
     // ---------------------------------------------------------
     // EVENT HANDLERS
