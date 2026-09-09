@@ -19,6 +19,7 @@ window.onload = () => {
     game.save = new Save(game);
     game.requirements = new Requirements(game);
     window.placementrules.init(game);
+    window.placementpreview.init(game);
 
     // Load previous save if available
     game.save.load();
