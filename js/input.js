@@ -42,11 +42,9 @@ class Input {
         });
         
             window.addEventListener("pointerup", () => {
-            this.draggingItem = null;
-            window.placementpreview.clear();
-        });
-
-        
+    // Only hide ghost, do NOT clear draggingItem here
+    window.ui.dragGhost.style.opacity = 0;
+});
 
         this.canvas.addEventListener("pointerup", () => {
     if (!this.draggingItem) return;
