@@ -1,15 +1,15 @@
-// Camera.js
+// camera.js
 class Camera {
     constructor(grid, canvas) {
         this.grid = grid;
         this.canvas = canvas;
 
-        // Camera position in world space
-        this.x = 300;
+        // Camera position in screen space
+        this.x = canvas.width / 2;
         this.y = 150;
 
         // Zoom level
-        this.zoom = 0.35;
+        this.zoom = 1;
 
         // Tile size (must match renderer)
         this.tileW = 96;
@@ -26,14 +26,19 @@ class Camera {
         this.attachEvents();
     }
 
+    // ---------------------------------------------------------
+    // EVENT HANDLERS
+    // ---------------------------------------------------------
     attachEvents() {
-        // PAN
+
+        // Start drag
         this.canvas.addEventListener("pointerdown", (e) => {
             this.dragging = true;
             this.lastX = e.clientX;
             this.lastY = e.clientY;
         });
 
+        // Drag move
         this.canvas.addEventListener("pointermove", (e) => {
             if (!this.dragging) return;
 
@@ -47,18 +52,19 @@ class Camera {
             this.lastY = e.clientY;
         });
 
+        // End drag
         this.canvas.addEventListener("pointerup", () => {
             this.dragging = false;
         });
 
-        // ZOOM
+        // Mouse wheel zoom
         this.canvas.addEventListener("wheel", (e) => {
             const oldZoom = this.zoom;
 
             if (e.deltaY < 0) this.zoom *= 1.1;
             else this.zoom *= 0.9;
 
-            this.zoom = Math.max(0.2, Math.min(3, this.zoom));
+            this.zoom = Math.max(0.3, Math.min(3, this.zoom));
 
             // Zoom toward cursor
             const mx = e.clientX;
@@ -68,7 +74,7 @@ class Camera {
             this.y = my - (my - this.y) * (this.zoom / oldZoom);
         });
 
-        // TOUCH PINCH ZOOM
+        // Touch pinch zoom
         this.canvas.addEventListener("touchmove", (e) => {
             if (e.touches.length === 2) {
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -78,7 +84,7 @@ class Camera {
                 if (this.touchDistance !== 0) {
                     const scale = dist / this.touchDistance;
                     this.zoom *= scale;
-                    this.zoom = Math.max(0.2, Math.min(3, this.zoom));
+                    this.zoom = Math.max(0.3, Math.min(3, this.zoom));
                 }
 
                 this.touchDistance = dist;
@@ -91,24 +97,30 @@ class Camera {
     }
 
     // ---------------------------------------------------------
-    // ISO → SCREEN (NO CAMERA TRANSFORM HERE)
+    // ISO → SCREEN
     // ---------------------------------------------------------
     isoToScreen(ix, iy) {
         const x = (ix - iy) * (this.tileW / 2);
         const y = (ix + iy) * (this.tileH / 2);
-        return { x, y };
+
+        return {
+            x: this.x + x * this.zoom,
+            y: this.y + y * this.zoom
+        };
     }
 
     // ---------------------------------------------------------
-    // SCREEN → ISO (convert screen → camera space)
+    // SCREEN → ISO
     // ---------------------------------------------------------
     screenToIso(sx, sy) {
-        const cx = (sx - this.x) / this.zoom;
-        const cy = (sy - this.y) / this.zoom;
+        const x = (sx - this.x) / this.zoom;
+        const y = (sy - this.y) / this.zoom;
 
-        const ix = (cy / (this.tileH / 2) + cx / (this.tileW / 2)) / 2;
-        const iy = (cy / (this.tileH / 2) - cx / (this.tileW / 2)) / 2;
+        const ix = (y / (this.tileH / 2) + x / (this.tileW / 2)) / 2;
+        const iy = (y / (this.tileH / 2) - x / (this.tileW / 2)) / 2;
 
         return { x: ix, y: iy };
     }
 }
+
+window.Camera = Camera;
