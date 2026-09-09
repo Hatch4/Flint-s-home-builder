@@ -5,7 +5,7 @@ window.placementrules = {
     // MAIN VALIDATION ENTRY POINT
     // ---------------------------------------------------------
     isValid(tileX, tileY, item) {
-        const cell = window.grid.get(tileX, tileY);
+        const cell = window.game.grid.get(tileX, tileY);
         if (!cell) return false;
 
         switch (item.category) {
