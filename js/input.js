@@ -40,6 +40,13 @@ class Input {
             const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
             window.placementpreview.update(tile.x, tile.y, valid);
         });
+        
+            window.addEventListener("pointerup", () => {
+            this.draggingItem = null;
+            window.placementpreview.clear();
+        });
+
+        
 
         this.canvas.addEventListener("pointerup", () => {
     if (!this.draggingItem) return;
