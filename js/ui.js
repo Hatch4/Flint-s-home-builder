@@ -37,14 +37,16 @@ class UI {
 
             btn.appendChild(img);
 
-            btn.addEventListener("pointerdown", (e) => {
-                e.preventDefault();
-                e.stopImmediatePropagation();   // ⭐ blocks capture + bubble
+           btn.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
 
-            window.input.startDraggingItem(item);
-            window.placementpreview.clear();
-            });
+    // ⭐ Prevent accidental re-drag after placement
+    if (window.input.draggingItem !== null) return;
 
+    window.input.startDraggingItem(item);
+    window.placementpreview.clear();
+});
 
             this.tray.appendChild(btn);
         }
