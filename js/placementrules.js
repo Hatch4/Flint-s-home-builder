@@ -1,50 +1,77 @@
-// PlacementRules.js
+// placementrules.js
 window.placementrules = {
+
+    // ---------------------------------------------------------
+    // MAIN VALIDATION ENTRY POINT
+    // ---------------------------------------------------------
     isValid(tileX, tileY, item) {
         const cell = window.grid.get(tileX, tileY);
         if (!cell) return false;
 
         switch (item.category) {
 
-            // -------------------------------------------------
-            // FLOOR
-            // -------------------------------------------------
             case "floor":
-                return cell.floor === null;
+                return this.canPlaceFloor(cell);
 
-            // -------------------------------------------------
-            // WALL (requires floor)
-            // -------------------------------------------------
             case "wall":
-                return cell.floor !== null && cell.wall === null;
+                return this.canPlaceWall(cell);
 
-            // -------------------------------------------------
-            // ROOF (requires wall)
-            // -------------------------------------------------
             case "roof":
-                return cell.wall !== null && cell.roof === null;
+                return this.canPlaceRoof(cell);
 
-            // -------------------------------------------------
-            // DOOR (requires wall)
-            // -------------------------------------------------
-            case "door":
-                return cell.wall !== null && cell.door === null;
-
-            // -------------------------------------------------
-            // WINDOW (requires wall)
-            // -------------------------------------------------
-            case "window":
-                return cell.wall !== null && cell.window === null;
-
-            // -------------------------------------------------
-            // DECOR (always allowed)
-            // -------------------------------------------------
             case "decor":
-                return true;
+                return this.canPlaceDecor(cell);
+
+            case "door":
+                return this.canPlaceDoor(cell);
+
+            case "window":
+                return this.canPlaceWindow(cell);
 
             default:
                 return false;
         }
+    },
+
+    // ---------------------------------------------------------
+    // FLOOR RULES
+    // ---------------------------------------------------------
+    canPlaceFloor(cell) {
+        return !cell.floor;
+    },
+
+    // ---------------------------------------------------------
+    // WALL RULES
+    // ---------------------------------------------------------
+    canPlaceWall(cell) {
+        return cell.floor && !cell.wall;
+    },
+
+    // ---------------------------------------------------------
+    // ROOF RULES
+    // ---------------------------------------------------------
+    canPlaceRoof(cell) {
+        return cell.wall && !cell.roof;
+    },
+
+    // ---------------------------------------------------------
+    // DECOR RULES
+    // ---------------------------------------------------------
+    canPlaceDecor(cell) {
+        return true; // decor always allowed
+    },
+
+    // ---------------------------------------------------------
+    // DOOR RULES
+    // ---------------------------------------------------------
+    canPlaceDoor(cell) {
+        return cell.wall && !cell.door;
+    },
+
+    // ---------------------------------------------------------
+    // WINDOW RULES
+    // ---------------------------------------------------------
+    canPlaceWindow(cell) {
+        return cell.wall && !cell.window;
     }
 };
-
