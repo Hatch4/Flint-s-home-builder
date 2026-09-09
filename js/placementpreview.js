@@ -2,6 +2,8 @@
 window.placementpreview = {
     tile: null,
     valid: false,
+    grid: null,
+    camera: null,
 
     init(game) {
         this.grid = game.grid;
@@ -18,30 +20,37 @@ window.placementpreview = {
     },
 
     draw(ctx) {
-    if (!this.tile) return;
+        if (!this.tile) return;
 
-    const { x, y } = this.tile;
+        const { x, y } = this.tile;
 
-    const pos = this.camera.isoToScreen(x, y);
+        // Convert tile → screen using camera
+        const pos = this.camera.isoToScreen(x, y);
 
-    ctx.save();
-    ctx.translate(pos.x, pos.y);
+        ctx.save();
 
-    const w = this.grid.tileW / 2;
-    const h = this.grid.tileH / 2;
+        // Apply camera transform
+        ctx.translate(this.camera.x, this.camera.y);
+        ctx.scale(this.camera.zoom, this.camera.zoom);
 
-    ctx.fillStyle = this.valid
-        ? "rgba(0,255,0,0.35)"
-        : "rgba(255,0,0,0.35)";
+        // Move to tile position
+        ctx.translate(pos.x, pos.y);
 
-    ctx.beginPath();
-    ctx.moveTo(0, -h);
-    ctx.lineTo(w, 0);
-    ctx.lineTo(0, h);
-    ctx.lineTo(-w, 0);
-    ctx.closePath();
-    ctx.fill();
+        const w = this.grid.tileW / 2;
+        const h = this.grid.tileH / 2;
 
-    ctx.restore();
-}
+        ctx.fillStyle = this.valid
+            ? "rgba(0,255,0,0.35)"
+            : "rgba(255,0,0,0.35)";
+
+        ctx.beginPath();
+        ctx.moveTo(0, -h);
+        ctx.lineTo(w, 0);
+        ctx.lineTo(0, h);
+        ctx.lineTo(-w, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+    }
 };
