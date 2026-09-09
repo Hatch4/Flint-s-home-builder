@@ -41,18 +41,6 @@ class Input {
             window.placementpreview.update(tile.x, tile.y, valid);
         });
 
-        btn.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-
-    // ⭐ Only start a drag if we are NOT already dragging
-    if (window.input.draggingItem !== null) return;
-
-    window.input.startDraggingItem(item);
-    window.placementpreview.clear();
-});
-
-
         this.canvas.addEventListener("pointerup", () => {
     if (!this.draggingItem) return;
 
