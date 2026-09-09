@@ -18,7 +18,6 @@ class UI {
         this.bindButtons();
         this.bindGhost();
     }
-}
 
     // ---------------------------------------------------------
     // BUILD TRAY
@@ -39,7 +38,6 @@ class UI {
 
                 if (window.input.draggingItem !== null) return;
 
-                // Only start drag on actual click/tap
                 if (e.pointerType === "mouse" && e.buttons !== 1) return;
 
                 window.input.startDraggingItem(item);
