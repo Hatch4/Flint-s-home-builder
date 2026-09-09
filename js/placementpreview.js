@@ -25,11 +25,6 @@ window.placementpreview = {
     const pos = this.camera.isoToScreen(x, y);
 
     ctx.save();
-
-    // ⭐ Apply camera transform so preview matches tile placement
-    ctx.translate(this.camera.x, this.camera.y);
-    ctx.scale(this.camera.zoom, this.camera.zoom);
-
     ctx.translate(pos.x, pos.y);
 
     const w = this.grid.tileW / 2;
