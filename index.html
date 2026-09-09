@@ -12,40 +12,41 @@
 
 <body>
 
-    <!-- Fullscreen canvas -->
+    <!-- GAME CANVAS (background layer) -->
     <canvas id="gameCanvas"></canvas>
-    
-        <div id="itemTray"></div>
-        <button id="rotateBtn">⟳</button>
 
-
-    <!-- UI Layer -->
+    <!-- UI LAYER (always above canvas) -->
     <div id="ui-layer">
+
+        <!-- Top bar -->
         <div id="top-bar">
             <div id="game-title">Flint Blockwood: Home for an Octopus</div>
             <div id="progress-indicator">0%</div>
             <img id="flint-face" src="assets/ui/flint_default.png" alt="Flint">
         </div>
-        
+
+        <!-- Drag ghost -->
         <div id="drag-ghost"></div>
 
         <!-- Bottom item tray -->
         <div id="itemTray"></div>
 
-        <!-- Mobile/desktop rotate button -->
-        <div id="rotateBtn">↻</div>
+        <!-- Rotate button -->
+        <button id="rotateBtn">↻</button>
 
+        <!-- Side buttons -->
         <div id="side-buttons">
             <button id="delete-btn">Delete</button>
             <button id="interior-btn">Interior</button>
         </div>
-    </div>
-    
-    <button id="save-btn">Save</button>
-    <button id="load-btn">Load</button>
-    <input type="file" id="load-file" accept=".json" style="display:none">
 
-    <!-- Modular JS Files -->
+        <!-- Save/load -->
+        <button id="save-btn">Save</button>
+        <button id="load-btn">Load</button>
+        <input type="file" id="load-file" accept=".json" style="display:none">
+    </div>
+
+    <!-- JS Files -->
     <script src="js/assets.js"></script>
     <script src="js/grid.js"></script>
     <script src="js/camera.js"></script>
@@ -56,12 +57,9 @@
     <script src="js/animation.js"></script>
     <script src="js/placement.js"></script>
     <script src="js/items.js"></script>
-
     <script src="js/save.js"></script>
     <script src="js/requirements.js"></script>
-
     <script src="js/ui.js"></script>
-
     <script src="js/debug.js"></script>
     <script src="js/main.js"></script>
 
