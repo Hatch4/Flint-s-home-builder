@@ -39,6 +39,7 @@ class UI {
 
             btn.addEventListener("pointerup", (e) => {
     e.preventDefault();
+    e.stopPropagation();   // ⭐ required
     window.input.startDraggingItem(item);
 });
             this.tray.appendChild(btn);
