@@ -38,12 +38,13 @@ class UI {
             btn.appendChild(img);
 
             btn.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+                e.preventDefault();
+                e.stopImmediatePropagation();   // ⭐ blocks capture + bubble
 
-    window.input.startDraggingItem(item);
-    window.placementpreview.clear();
-});
+            window.input.startDraggingItem(item);
+            window.placementpreview.clear();
+            });
+
 
             this.tray.appendChild(btn);
         }
