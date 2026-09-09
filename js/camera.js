@@ -5,8 +5,9 @@ class Camera {
         this.canvas = canvas;
 
         // Camera position in screen space
-        this.x = canvas.width / 2;
-        this.y = 150;
+        this.x = canvas.width / 2 - (this.grid.width * this.tileW) / 4;
+        this.y = canvas.height / 2 - (this.grid.height * this.tileH) / 4;
+
 
         // Zoom level
         this.zoom = 1;
