@@ -40,11 +40,6 @@ class Input {
             const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
             window.placementpreview.update(tile.x, tile.y, valid);
         });
-        
-            window.addEventListener("pointerup", () => {
-    // Only hide ghost, do NOT clear draggingItem here
-    window.ui.dragGhost.style.opacity = 0;
-});
 
         this.canvas.addEventListener("pointerup", () => {
     if (!this.draggingItem) return;
