@@ -1,4 +1,3 @@
-// renderer.js
 class Renderer {
     constructor(canvas, grid, camera) {
         this.canvas = canvas;
@@ -6,68 +5,55 @@ class Renderer {
         this.grid = grid;
         this.camera = camera;
 
-        this.tileW = 96;
-        this.tileH = 48;
-
-        this.colors = {
-            floor: "#c8c8c8",
-            wall: "#8b5a2b",
-            roof: "#b8860b",
-            decor: "#ff66cc",
-            door: "#663300",
-            window: "#99ccff"
-        };
+        this.tileW = grid.tileW;
+        this.tileH = grid.tileH;
     }
 
-    // ---------------------------------------------------------
-    // MAIN RENDER ENTRY POINT
-    // ---------------------------------------------------------
     render() {
         const ctx = this.ctx;
-
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         ctx.save();
+        ctx.translate(this.camera.x, this.camera.y);
+        ctx.scale(this.camera.zoom, this.camera.zoom);
 
-        // Draw tiles in correct isometric order
-        for (let y = 0; y < this.grid.height; y++) {
-            for (let x = 0; x < this.grid.width; x++) {
-                const tile = this.grid.tiles[y][x];
-                const pos = this.grid.isoToScreen(x, y);
+        // Draw all tiles in iso space
+        for (const [key, cell] of this.grid.cells.entries()) {
+            const [xStr, yStr] = key.split(",");
+            const x = parseInt(xStr, 10);
+            const y = parseInt(yStr, 10);
 
-                ctx.save();
-                ctx.translate(pos.x, pos.y);
+            const screen = this.camera.isoToScreen(x, y);
 
-                this.drawFloor(tile);
-                this.drawWall(tile);
-                this.drawDoor(tile);
-                this.drawWindow(tile);
-                this.drawRoof(tile);
-                this.drawDecor(tile);
+            ctx.save();
+            ctx.translate(
+                (screen.x - this.camera.x) / this.camera.zoom,
+                (screen.y - this.camera.y) / this.camera.zoom
+            );
 
-                ctx.restore();
-            }
+            this.drawFloor(cell);
+            this.drawWall(cell);
+            this.drawDoor(cell);
+            this.drawWindow(cell);
+            this.drawRoof(cell);
+            this.drawDecor(cell);
+
+            ctx.restore();
         }
 
         ctx.restore();
 
-        // Draw placement preview (screen space)
-        window.placementpreview.draw(ctx);
-
-        // Draw animations (screen space)
-        window.animation.draw(ctx);
+        // Draw preview AFTER camera restore
+        placementpreview.draw(ctx);
     }
 
-    // ---------------------------------------------------------
-    // DRAW FLOOR
-    // ---------------------------------------------------------
-    drawFloor(tile) {
-        if (!tile.floor) return;
+    drawFloor(cell) {
+        if (!cell.floor) return;
 
         const w = this.tileW / 2;
         const h = this.tileH / 2;
 
-        this.ctx.fillStyle = this.colors.floor;
+        this.ctx.fillStyle = "#c8c8c8";
         this.ctx.beginPath();
         this.ctx.moveTo(0, -h);
         this.ctx.lineTo(w, 0);
@@ -77,33 +63,21 @@ class Renderer {
         this.ctx.fill();
     }
 
-    // ---------------------------------------------------------
-    // DRAW WALL
-    // ---------------------------------------------------------
-    drawWall(tile) {
-        if (!tile.wall || tile.wall.type !== "wall") return;
-        this.drawWallShape(this.colors.wall);
+    drawWall(cell) {
+        if (!cell.wall) return;
+        this.drawWallShape("#8b5a2b");
     }
 
-    // ---------------------------------------------------------
-    // DRAW DOOR
-    // ---------------------------------------------------------
-    drawDoor(tile) {
-        if (!tile.wall || tile.wall.type !== "door") return;
-        this.drawWallShape(this.colors.door);
+    drawDoor(cell) {
+        if (!cell.door) return;
+        this.drawWallShape("#663300");
     }
 
-    // ---------------------------------------------------------
-    // DRAW WINDOW
-    // ---------------------------------------------------------
-    drawWindow(tile) {
-        if (!tile.wall || tile.wall.type !== "window") return;
-        this.drawWallShape(this.colors.window);
+    drawWindow(cell) {
+        if (!cell.window) return;
+        this.drawWallShape("#99ccff");
     }
 
-    // ---------------------------------------------------------
-    // WALL SHAPE (shared)
-    // ---------------------------------------------------------
     drawWallShape(color) {
         const ctx = this.ctx;
         const w = this.tileW / 2;
@@ -118,17 +92,14 @@ class Renderer {
         ctx.fill();
     }
 
-    // ---------------------------------------------------------
-    // DRAW ROOF
-    // ---------------------------------------------------------
-    drawRoof(tile) {
-        if (!tile.roof) return;
+    drawRoof(cell) {
+        if (!cell.roof) return;
 
         const ctx = this.ctx;
         const w = this.tileW / 2;
         const h = this.tileH / 2;
 
-        ctx.fillStyle = this.colors.roof;
+        ctx.fillStyle = "#b8860b";
         ctx.beginPath();
         ctx.moveTo(0, -h - 40);
         ctx.lineTo(w, -40);
@@ -138,20 +109,15 @@ class Renderer {
         ctx.fill();
     }
 
-    // ---------------------------------------------------------
-    // DRAW DECOR
-    // ---------------------------------------------------------
-    drawDecor(tile) {
-        if (!tile.decor || tile.decor.length === 0) return;
+    drawDecor(cell) {
+        if (!cell.decor) return;
 
         const ctx = this.ctx;
 
-        for (const d of tile.decor) {
-            ctx.fillStyle = this.colors.decor;
-            ctx.beginPath();
-            ctx.arc(0, -20, 12, 0, Math.PI * 2);
-            ctx.fill();
-        }
+        ctx.fillStyle = "#ff66cc";
+        ctx.beginPath();
+        ctx.arc(0, -20, 12, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 
