@@ -2,27 +2,56 @@
 class Save {
     constructor(game) {
         this.game = game;
-        this.key = "flint_octopus_house_save";
+        this.key = "tentaclebill_save_v1";
     }
 
     // ---------------------------------------------------------
-    // Save game state to localStorage
+    // AUTO SAVE (called every requirements update)
     // ---------------------------------------------------------
-    save() {
-        const data = {
-            grid: this.game.grid.serialize(),
-            camera: {
-                angle: this.game.camera.angle,
-                targetAngle: this.game.camera.targetAngle,
-                interiorMode: this.game.camera.interiorMode
-            }
-        };
-
+    autoSave() {
+        const data = this.serialize();
         localStorage.setItem(this.key, JSON.stringify(data));
     }
 
     // ---------------------------------------------------------
-    // Load game state from localStorage
+    // MANUAL SAVE → DOWNLOAD FILE
+    // ---------------------------------------------------------
+    saveToFile() {
+        const data = this.serialize();
+        const json = JSON.stringify(data, null, 2);
+
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "tentaclebill_save.json";
+        a.click();
+
+        URL.revokeObjectURL(url);
+    }
+
+    // ---------------------------------------------------------
+    // MANUAL LOAD → FROM FILE INPUT
+    // ---------------------------------------------------------
+    loadFromFile(file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                this.deserialize(data);
+                this.autoSave();
+            } catch (err) {
+                console.error("Invalid save file:", err);
+            }
+        };
+
+        reader.readAsText(file);
+    }
+
+    // ---------------------------------------------------------
+    // LOAD FROM LOCAL STORAGE
     // ---------------------------------------------------------
     load() {
         const raw = localStorage.getItem(this.key);
@@ -30,28 +59,34 @@ class Save {
 
         try {
             const data = JSON.parse(raw);
-
-            // Restore grid
-            if (data.grid) {
-                this.game.grid.deserialize(data.grid);
-            }
-
-            // Restore camera
-            if (data.camera) {
-                this.game.camera.angle = data.camera.angle;
-                this.game.camera.targetAngle = data.camera.targetAngle;
-                this.game.camera.interiorMode = data.camera.interiorMode;
-            }
-
+            this.deserialize(data);
         } catch (err) {
-            console.error("Save file corrupted:", err);
+            console.error("Failed to load save:", err);
         }
     }
 
     // ---------------------------------------------------------
-    // Auto-save after each placement
+    // SERIALIZE GAME STATE
     // ---------------------------------------------------------
-    autoSave() {
-        this.save();
+    serialize() {
+        return {
+            grid: this.game.grid.serialize(),
+            requirementsCompleted: this.game.requirements.completed
+        };
+    }
+
+    // ---------------------------------------------------------
+    // DESERIALIZE GAME STATE
+    // ---------------------------------------------------------
+    deserialize(data) {
+        if (data.grid) {
+            this.game.grid.deserialize(data.grid);
+        }
+
+        if (data.requirementsCompleted) {
+            this.game.requirements.completed = true;
+        }
     }
 }
+
+window.Save = Save;
