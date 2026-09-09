@@ -1,110 +1,110 @@
 // placement.js
 class Placement {
-   static attemptPlacement(grid, x, y, item) {
-    if (!item) return false;
-
-    // Validate placement based on item type
-    if (!this.validate(grid, x, y, item)) {
-        this.triggerWiggle(x, y);
-        return false;
+    constructor(game) {
+        this.game = game;
     }
 
-    // Place item
-    this.place(grid, x, y, item);
+    // ---------------------------------------------------------
+    // ATTEMPT TO PLACE AN ITEM
+    // ---------------------------------------------------------
+    attempt(tileX, tileY, item) {
+        const grid = this.game.grid;
 
-    // Check build requirements
-    if (window.game && window.game.requirements) {
-        window.game.requirements.update();
+        // Validate placement
+        const valid = window.placementrules.isValid(tileX, tileY, item);
+        if (!valid) {
+            this.triggerWiggle(tileX, tileY);
+            return false;
+        }
+
+        // Place item
+        this.place(tileX, tileY, item);
+
+        // Update requirements
+        if (this.game.requirements) {
+            this.game.requirements.update();
+        }
+
+        return true;
     }
 
-    return true;
-}
-
-    static validate(grid, x, y, item) {
-        const tile = grid.tiles[y][x];
+    // ---------------------------------------------------------
+    // PLACE ITEM INTO GRID
+    // ---------------------------------------------------------
+    place(tileX, tileY, item) {
+        const tile = this.game.grid.get(tileX, tileY);
 
         switch (item.category) {
 
             case "floor":
-                // Floor can be placed anywhere
-                return true;
-
-            case "wall":
-                // Walls must be on perimeter
-                return this.isPerimeterTile(grid, x, y);
-
-            case "door":
-                // Door must be on perimeter AND tile must not already have a wall
-                return this.isPerimeterTile(grid, x, y) && !tile.wall;
-
-            case "window":
-                // Window must be on perimeter AND tile must not already have a wall
-                return this.isPerimeterTile(grid, x, y) && !tile.wall;
-
-            case "roof":
-                // Roof must be placed on any tile that has floor
-                return tile.floor;
-
-            case "decor":
-                // Decor can be placed anywhere except roof tiles
-                return !tile.roof;
-
-            case "lantern":
-                // Lantern must be placed on exterior perimeter
-                return this.isPerimeterTile(grid, x, y);
-
-            default:
-                return false;
-        }
-    }
-
-    static place(grid, x, y, item) {
-        const tile = grid.tiles[y][x];
-
-        switch (item.category) {
-
-            case "floor":
-                grid.placeFloor(x, y);
+                tile.floor = true;
                 break;
 
             case "wall":
-                grid.placeWall(x, y, { type: "wall" });
+                tile.wall = { type: "wall", rotation: item.rotation };
                 break;
 
             case "door":
-                grid.placeWall(x, y, { type: "door" });
+                tile.wall = { type: "door", rotation: item.rotation };
                 break;
 
             case "window":
-                grid.placeWall(x, y, { type: "window" });
+                tile.wall = { type: "window", rotation: item.rotation };
                 break;
 
             case "roof":
-                grid.placeRoof(x, y);
+                tile.roof = true;
                 break;
 
             case "decor":
-                grid.placeDecor(x, y, { type: item.type });
+                if (!tile.decor) tile.decor = [];
+                tile.decor.push({ type: item.type, rotation: item.rotation });
                 break;
+        }
 
-            case "lantern":
-                grid.placeDecor(x, y, { type: "lantern" });
-                break;
+        // Dust puff animation
+        window.animation.spawnDust(tileX, tileY);
+    }
+
+    // ---------------------------------------------------------
+    // DELETE ITEM FROM TILE
+    // ---------------------------------------------------------
+    delete(tileX, tileY) {
+        const tile = this.game.grid.get(tileX, tileY);
+        if (!tile) return;
+
+        // Delete decor first (topmost)
+        if (tile.decor && tile.decor.length > 0) {
+            tile.decor.pop();
+            return;
+        }
+
+        // Delete roof
+        if (tile.roof) {
+            tile.roof = false;
+            return;
+        }
+
+        // Delete wall / door / window
+        if (tile.wall) {
+            tile.wall = null;
+            return;
+        }
+
+        // Delete floor
+        if (tile.floor) {
+            tile.floor = false;
+            return;
         }
     }
 
-    static isPerimeterTile(grid, x, y) {
-        return (
-            x === 0 ||
-            y === 0 ||
-            x === grid.width - 1 ||
-            y === grid.height - 1
-        );
-    }
-
-    // Wiggle animation hook (renderer can animate this visually)
-    static triggerWiggle(x, y) {
-        // For now, just log — renderer can animate later
-        console.log(`Invalid placement at (${x}, ${y}) — wiggle!`);
+    // ---------------------------------------------------------
+    // WIGGLE ANIMATION (invalid placement)
+    // ---------------------------------------------------------
+    triggerWiggle(tileX, tileY) {
+        console.log(`Invalid placement at (${tileX}, ${tileY}) — wiggle!`);
+        // Renderer can animate this visually later
     }
 }
+
+window.Placement = Placement;
