@@ -100,6 +100,26 @@ html, body {
     z-index: 3; /* above everything */
 }
 
+.trayItem {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 64px;
+    height: 64px;
+    margin: 6px;
+    padding: 4px;
+    background: #333;
+    border-radius: 8px;
+}
+
+.trayIcon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+
 .itemButton {
     width: 80px;
     height: 80px;
