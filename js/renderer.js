@@ -29,10 +29,6 @@ class Renderer {
 
         ctx.save();
 
-        // CRITICAL: camera transform must be applied BEFORE drawing tiles
-        ctx.translate(this.camera.x, this.camera.y);
-        ctx.scale(this.camera.zoom, this.camera.zoom);
-
         // Draw tiles in correct isometric order
         for (let y = 0; y < this.grid.height; y++) {
             for (let x = 0; x < this.grid.width; x++) {
