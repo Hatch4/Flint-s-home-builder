@@ -40,6 +40,15 @@ class Input {
             const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
             window.placementpreview.update(tile.x, tile.y, valid);
         });
+        
+        this.canvas.addEventListener("pointerdown", (e) => {
+    // Prevent canvas clicks from starting a new drag
+    if (!this.draggingItem) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return;
+    }
+});
 
         this.canvas.addEventListener("pointerup", () => {
     if (!this.draggingItem) return;
