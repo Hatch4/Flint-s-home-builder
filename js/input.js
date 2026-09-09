@@ -44,6 +44,8 @@ class Input {
         this.canvas.addEventListener("pointerdown", (e) => {
     // Prevent canvas clicks from starting a new drag
     if (!this.draggingItem) {
+        e.preventDefault();
+        e.stopImmediatePropagation();   // ⭐ fully blocks the event
         return;
     }
 });
