@@ -133,30 +133,6 @@ html, body {
     pointer-events: none;
 }
 
-
-.itemButton {
-    width: 80px;
-    height: 80px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    transition: transform 0.15s;
-}
-
-.itemButton img {
-    width: 64px;   /* crisp icons */
-    height: 64px;
-    object-fit: contain;
-}
-
-.itemButton:active {
-    transform: scale(0.92);
-}
-
 /* ---------------------------------------------------------
    ROTATE BUTTON (mobile/desktop)
 --------------------------------------------------------- */
