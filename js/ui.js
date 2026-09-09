@@ -37,9 +37,12 @@ class UI {
 
             btn.appendChild(img);
 
-           btn.addEventListener("pointerdown", (e) => {
+          btn.addEventListener("pointerdown", (e) => {
     e.preventDefault();
-    e.stopImmediatePropagation();   // ⭐ blocks capture + bubble
+    e.stopImmediatePropagation();
+
+    // ⭐ Only start dragging on an actual left-click
+    if (e.pointerType === "mouse" && e.buttons !== 1) return;
 
     // ⭐ Prevent accidental re-drag after placement
     if (window.input.draggingItem !== null) return;
