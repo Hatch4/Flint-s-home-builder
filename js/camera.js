@@ -1,126 +1,32 @@
-// camera.js
 class Camera {
-    constructor(grid, canvas) {
-    this.grid = grid;
-    this.canvas = canvas;
+    constructor(tileW, tileH) {
+        this.tileW = tileW;
+        this.tileH = tileH;
 
-    // Tile size (must match renderer)
-    this.tileW = 96;
-    this.tileH = 48;
-
-    // Camera position in screen space (center grid)
-    this.x = canvas.width / 2 - (this.grid.width * this.tileW) / 4;
-    this.y = canvas.height / 2 - (this.grid.height * this.tileH) / 4;
-
-    // Zoom level
-    this.zoom = 1;
-
-    // Dragging state
-    this.dragging = false;
-    this.lastX = 0;
-    this.lastY = 0;
-
-    // Touch pinch zoom
-    this.touchDistance = 0;
-
-    this.attachEvents();
-}
-
-    // ---------------------------------------------------------
-    // EVENT HANDLERS
-    // ---------------------------------------------------------
-    attachEvents() {
-
-        // Start drag
-        this.canvas.addEventListener("pointerdown", (e) => {
-            this.dragging = true;
-            this.lastX = e.clientX;
-            this.lastY = e.clientY;
-        });
-
-        // Drag move
-        this.canvas.addEventListener("pointermove", (e) => {
-            if (!this.dragging) return;
-
-            const dx = e.clientX - this.lastX;
-            const dy = e.clientY - this.lastY;
-
-            this.x += dx;
-            this.y += dy;
-
-            this.lastX = e.clientX;
-            this.lastY = e.clientY;
-        });
-
-        // End drag
-        this.canvas.addEventListener("pointerup", () => {
-            this.dragging = false;
-        });
-
-        // Mouse wheel zoom
-        this.canvas.addEventListener("wheel", (e) => {
-            const oldZoom = this.zoom;
-
-            if (e.deltaY < 0) this.zoom *= 1.1;
-            else this.zoom *= 0.9;
-
-            this.zoom = Math.max(0.3, Math.min(3, this.zoom));
-
-            // Zoom toward cursor
-            const mx = e.clientX;
-            const my = e.clientY;
-
-            this.x = mx - (mx - this.x) * (this.zoom / oldZoom);
-            this.y = my - (my - this.y) * (this.zoom / oldZoom);
-        });
-
-        // Touch pinch zoom
-        this.canvas.addEventListener("touchmove", (e) => {
-            if (e.touches.length === 2) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (this.touchDistance !== 0) {
-                    const scale = dist / this.touchDistance;
-                    this.zoom *= scale;
-                    this.zoom = Math.max(0.3, Math.min(3, this.zoom));
-                }
-
-                this.touchDistance = dist;
-            }
-        });
-
-        this.canvas.addEventListener("touchend", () => {
-            this.touchDistance = 0;
-        });
+        this.x = 480;   // center offset (tweak as needed)
+        this.y = 360;
+        this.zoom = 1;
     }
 
-    // ---------------------------------------------------------
+    // SCREEN → ISO
+    screenToIso(screenX, screenY) {
+        const x = (screenX - this.x) / this.zoom;
+        const y = (screenY - this.y) / this.zoom;
+
+        const isoX = (y / this.tileH) + (x / this.tileW);
+        const isoY = (y / this.tileH) - (x / this.tileW);
+
+        return { x: isoX, y: isoY };
+    }
+
     // ISO → SCREEN
-    // ---------------------------------------------------------
-    isoToScreen(ix, iy) {
-        const x = (ix - iy) * (this.tileW / 2);
-        const y = (ix + iy) * (this.tileH / 2);
+    isoToScreen(isoX, isoY) {
+        const x = (isoX - isoY) * (this.tileW / 2);
+        const y = (isoX + isoY) * (this.tileH / 2);
 
         return {
-            x: this.x + x * this.zoom,
-            y: this.y + y * this.zoom
+            x: x * this.zoom + this.x,
+            y: y * this.zoom + this.y
         };
     }
-
-    // ---------------------------------------------------------
-    // SCREEN → ISO
-    // ---------------------------------------------------------
-    screenToIso(sx, sy) {
-        const x = (sx - this.x) / this.zoom;
-        const y = (sy - this.y) / this.zoom;
-
-        const ix = (y / (this.tileH / 2) + x / (this.tileW / 2)) / 2;
-        const iy = (y / (this.tileH / 2) - x / (this.tileW / 2)) / 2;
-
-        return { x: ix, y: iy };
-    }
 }
-
-window.Camera = Camera;
