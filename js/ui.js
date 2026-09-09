@@ -37,11 +37,10 @@ class UI {
 
             btn.appendChild(img);
 
-            btn.addEventListener("pointerdown", (e) => {
-                e.preventDefault();
-                window.input.startDraggingItem(item);
-            });
-
+            btn.addEventListener("pointerup", (e) => {
+    e.preventDefault();
+    window.input.startDraggingItem(item);
+});
             this.tray.appendChild(btn);
         }
     }
