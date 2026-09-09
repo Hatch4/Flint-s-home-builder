@@ -1,4 +1,3 @@
-// placementpreview.js
 window.placementpreview = {
     tile: null,
     valid: false,
@@ -23,18 +22,10 @@ window.placementpreview = {
         if (!this.tile) return;
 
         const { x, y } = this.tile;
-
-        // Convert tile → screen using camera
-        const pos = this.camera.isoToScreen(x, y);
+        const screen = this.camera.isoToScreen(x, y);
 
         ctx.save();
-
-        // Apply camera transform
-        ctx.translate(this.camera.x, this.camera.y);
-        ctx.scale(this.camera.zoom, this.camera.zoom);
-
-        // Move to tile position
-        ctx.translate(pos.x, pos.y);
+        ctx.translate(screen.x, screen.y);
 
         const w = this.grid.tileW / 2;
         const h = this.grid.tileH / 2;
