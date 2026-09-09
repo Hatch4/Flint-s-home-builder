@@ -44,7 +44,17 @@ html, body {
     pointer-events: none; /* UI elements override this */
 }
 
-#ui-layer * {
+#ui-layer {
+    pointer-events: none;
+}
+
+#itemTray,
+#side-buttons,
+#save-btn,
+#load-btn,
+#delete-btn,
+#interior-btn,
+#rotateBtn {
     pointer-events: auto;
 }
 
