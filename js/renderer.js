@@ -6,11 +6,9 @@ class Renderer {
         this.grid = grid;
         this.camera = camera;
 
-        // Tile size (must match camera)
         this.tileW = 96;
         this.tileH = 48;
 
-        // Preload simple colors or images if needed
         this.colors = {
             floor: "#c8c8c8",
             wall: "#8b5a2b",
@@ -27,9 +25,11 @@ class Renderer {
     render() {
         const ctx = this.ctx;
 
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
         ctx.save();
 
-        // Apply camera transform once
+        // CRITICAL: camera transform must be applied BEFORE drawing tiles
         ctx.translate(this.camera.x, this.camera.y);
         ctx.scale(this.camera.zoom, this.camera.zoom);
 
@@ -56,10 +56,10 @@ class Renderer {
         ctx.restore();
 
         // Draw placement preview (screen space)
-        window.placementpreview.draw(ctx, this.camera);
+        window.placementpreview.draw(ctx);
 
         // Draw animations (screen space)
-        window.animation.draw(ctx, this.camera);
+        window.animation.draw(ctx);
     }
 
     // ---------------------------------------------------------
@@ -86,7 +86,6 @@ class Renderer {
     // ---------------------------------------------------------
     drawWall(tile) {
         if (!tile.wall || tile.wall.type !== "wall") return;
-
         this.drawWallShape(this.colors.wall);
     }
 
@@ -95,7 +94,6 @@ class Renderer {
     // ---------------------------------------------------------
     drawDoor(tile) {
         if (!tile.wall || tile.wall.type !== "door") return;
-
         this.drawWallShape(this.colors.door);
     }
 
@@ -104,17 +102,15 @@ class Renderer {
     // ---------------------------------------------------------
     drawWindow(tile) {
         if (!tile.wall || tile.wall.type !== "window") return;
-
         this.drawWallShape(this.colors.window);
     }
 
     // ---------------------------------------------------------
-    // WALL SHAPE (shared by wall/door/window)
+    // WALL SHAPE (shared)
     // ---------------------------------------------------------
     drawWallShape(color) {
         const ctx = this.ctx;
         const w = this.tileW / 2;
-        const h = this.tileH / 2;
 
         ctx.fillStyle = color;
         ctx.beginPath();
