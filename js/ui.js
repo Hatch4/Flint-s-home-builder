@@ -110,8 +110,3 @@ class UI {
         this.interiorBtn.classList.toggle("active", window.input.interiorMode);
     }
 }
-
-// Initialize UI after game is ready
-window.addEventListener("DOMContentLoaded", () => {
-    window.ui = new UI(window.game);
-});
