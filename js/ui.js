@@ -37,13 +37,13 @@ class UI {
 
             btn.appendChild(img);
 
-            btn.addEventListener("pointerup", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            btn.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-            window.input.startDraggingItem(item);
-            window.placementpreview.clear();   // ⭐ required
-            });
+    window.input.startDraggingItem(item);
+    window.placementpreview.clear();
+});
 
             this.tray.appendChild(btn);
         }
