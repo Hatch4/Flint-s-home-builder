@@ -38,16 +38,6 @@ class Input {
             window.placementpreview.update(tile.x, tile.y, valid);
         });
 
-        this.canvas.addEventListener("pointerdown", (e) => {
-            const itemKey = e.target.dataset?.item;
-            if (itemKey) return; // UI click
-
-            const picked = window.uiPickItem?.(e);
-            if (!picked) return;
-
-            this.startDraggingItem(Items[picked]);
-        });
-
         this.canvas.addEventListener("pointerup", () => {
             if (!this.draggingItem) return;
 
