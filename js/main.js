@@ -9,20 +9,27 @@ window.onload = () => {
 
     resizeCanvas();
 
-    // Core game objects
-    game.grid = new Grid(5, 4);
-    game.camera = new Camera(game.grid, canvas);
-    game.renderer = new Renderer(canvas, game.grid, game.camera);
-    game.input = new Input(canvas, game.grid, game.camera);
-    game.items = Items;
-    game.ui = new UI(game);
-    game.save = new Save(game);
-    game.requirements = new Requirements(game);
-    game.placement = new Placement(game);   // ⭐ add this
+   // Core game objects
+game.tileW = 64;   // match your art
+game.tileH = 32;
 
-    window.game = game;                     // ⭐ make game global
-    window.placementrules.init(game);
-    window.placementpreview.init(game);
+game.grid = new Grid(game.tileW, game.tileH);
+game.camera = new Camera(game.tileW, game.tileH);
+
+game.renderer = new Renderer(canvas, game.grid, game.camera);
+game.input = new Input(canvas, game.grid, game.camera);
+game.items = Items;
+game.ui = new UI(game);
+game.save = new Save(game);
+game.requirements = new Requirements(game);
+
+// NEW placement engine
+placementpreview.init(game);
+placementrules.init(game);
+window.game.placement.init(game);
+
+window.game = game; // keep global
+
 
     game.save.load();
     game.debug = new DebugOverlay(game);
