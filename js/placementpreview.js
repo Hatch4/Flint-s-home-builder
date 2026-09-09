@@ -19,11 +19,11 @@ window.placementpreview = {
 
     draw(ctx) {
         if (!this.tile) return;
-        if (!this.camera || !this.grid) return; // prevent early crash
+        if (!this.camera || !this.grid) return;
 
         const { x, y } = this.tile;
 
-        // Convert tile → screen using the REAL camera
+        // ⭐ Correct isoToScreen call
         const pos = this.camera.isoToScreen(x, y);
 
         const w = this.grid.tileW / 2;
