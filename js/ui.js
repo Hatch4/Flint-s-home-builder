@@ -38,10 +38,13 @@ class UI {
             btn.appendChild(img);
 
             btn.addEventListener("pointerup", (e) => {
-    e.preventDefault();
-    e.stopPropagation();   // ⭐ required
-    window.input.startDraggingItem(item);
-});
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.input.startDraggingItem(item);
+            window.placementpreview.clear();   // ⭐ required
+            });
+
             this.tray.appendChild(btn);
         }
     }
