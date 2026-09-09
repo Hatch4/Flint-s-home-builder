@@ -1,171 +1,184 @@
-// Input.js
+// input.js
 class Input {
     constructor(canvas, grid, camera) {
         this.canvas = canvas;
         this.grid = grid;
         this.camera = camera;
 
-        this.mouse = { x: 0, y: 0 };
         this.draggingItem = null;
+        this.mouse = { x: 0, y: 0 };
+
+        this.touchStartTime = 0;
+
         this.deleteMode = false;
+        this.interiorMode = false;
 
         this.bindEvents();
-        this.canvas.style.touchAction = "none";
     }
 
     // ---------------------------------------------------------
-    // EVENT BINDINGS
+    // EVENT BINDING
     // ---------------------------------------------------------
     bindEvents() {
-        this.canvas.addEventListener("pointerdown", (e) => this.onPointerDown(e));
-        this.canvas.addEventListener("pointermove", (e) => this.onPointerMove(e));
-        this.canvas.addEventListener("pointerup", (e) => this.onPointerUp(e));
 
-        this.canvas.addEventListener("contextmenu", (e) => this.onRightClick(e));
+        /* -----------------------------
+           DESKTOP MOUSE
+        ----------------------------- */
 
-        window.addEventListener("keydown", (e) => this.onKeyDown(e));
-        window.addEventListener("wheel", (e) => this.onWheel(e));
+        this.canvas.addEventListener("pointermove", (e) => {
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
 
-        // Rotate button
-        const rotateBtn = document.getElementById("rotateBtn");
-        if (rotateBtn) {
-            rotateBtn.addEventListener("pointerdown", () => this.rotateItem());
-        }
+            if (!this.draggingItem) return;
 
-        // Delete button
-        const deleteBtn = document.getElementById("delete-btn");
-        if (deleteBtn) {
-            deleteBtn.addEventListener("pointerdown", () => {
-                this.deleteMode = !this.deleteMode;
-                deleteBtn.classList.toggle("active", this.deleteMode);
-            });
-        }
+            const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+            const tile = this.grid.snap(iso.x, iso.y);
+
+            const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+            window.placementpreview.update(tile.x, tile.y, valid);
+        });
+
+        this.canvas.addEventListener("pointerdown", (e) => {
+            const itemKey = e.target.dataset?.item;
+            if (itemKey) return; // UI click
+
+            const picked = window.uiPickItem?.(e);
+            if (!picked) return;
+
+            this.startDraggingItem(Items[picked]);
+        });
+
+        this.canvas.addEventListener("pointerup", () => {
+            if (!this.draggingItem) return;
+
+            const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+            const tile = this.grid.snap(iso.x, iso.y);
+
+            const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+
+            if (valid) {
+                this.grid.place(tile.x, tile.y, this.draggingItem);
+                window.animation.spawnDust(tile.x, tile.y);
+            }
+
+            this.draggingItem = null;
+            window.placementpreview.clear();
+        });
+
+        /* -----------------------------
+           KEYBOARD
+        ----------------------------- */
+
+        window.addEventListener("keydown", (e) => {
+            if (!this.draggingItem) return;
+
+            if (e.key === "r" || e.key === "R") {
+                this.rotateCurrentItem();
+            }
+        });
+
+        /* -----------------------------
+           MOUSE WHEEL ROTATE
+        ----------------------------- */
+
+        window.addEventListener("wheel", (e) => {
+            if (!this.draggingItem) return;
+
+            const delta = e.deltaY > 0 ? 90 : -90;
+            this.draggingItem.rotation = (this.draggingItem.rotation + delta + 360) % 360;
+        });
+
+        /* -----------------------------
+           MOBILE TOUCH
+        ----------------------------- */
+
+        this.canvas.addEventListener("touchstart", (e) => {
+            this.touchStartTime = Date.now();
+
+            const touch = e.touches[0];
+            this.mouse.x = touch.clientX;
+            this.mouse.y = touch.clientY;
+
+            const itemKey = window.uiPickItemTouch?.(touch);
+            if (itemKey) {
+                this.startDraggingItem(Items[itemKey]);
+            }
+        });
+
+        this.canvas.addEventListener("touchmove", (e) => {
+            const touch = e.touches[0];
+            this.mouse.x = touch.clientX;
+            this.mouse.y = touch.clientY;
+
+            if (!this.draggingItem) return;
+
+            // Two‑finger rotate
+            if (e.touches.length === 2) {
+                this.rotateCurrentItem();
+                return;
+            }
+
+            const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+            const tile = this.grid.snap(iso.x, iso.y);
+
+            const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+            window.placementpreview.update(tile.x, tile.y, valid);
+        });
+
+        this.canvas.addEventListener("touchend", () => {
+            if (!this.draggingItem) return;
+
+            const duration = Date.now() - this.touchStartTime;
+
+            // Long press = rotate
+            if (duration > 400) {
+                this.rotateCurrentItem();
+                return;
+            }
+
+            // Drop item
+            const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+            const tile = this.grid.snap(iso.x, iso.y);
+
+            const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+
+            if (valid) {
+                this.grid.place(tile.x, tile.y, this.draggingItem);
+                window.animation.spawnDust(tile.x, tile.y);
+            }
+
+            this.draggingItem = null;
+            window.placementpreview.clear();
+        });
     }
 
     // ---------------------------------------------------------
-    // UI DRAG START
+    // START DRAGGING ITEM
     // ---------------------------------------------------------
     startDraggingItem(item) {
         this.draggingItem = { ...item, rotation: 0 };
+        window.input = this;
     }
 
     // ---------------------------------------------------------
-    // POINTER DOWN
+    // ROTATE ITEM
     // ---------------------------------------------------------
-    onPointerDown(e) {
-        this.updateMouse(e);
-
-        // If dragging from UI, skip tile selection
-        if (this.draggingItem) return;
-
-        // Delete mode
-        if (this.deleteMode) {
-            this.deleteAtMouse();
-            return;
-        }
-
-        // Select tile
-        const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
-        const tile = this.grid.snap(iso.x, iso.y);
-
-        this.grid.selectedTile = tile;
-    }
-
-    // ---------------------------------------------------------
-    // POINTER MOVE
-    // ---------------------------------------------------------
-    onPointerMove(e) {
-        this.updateMouse(e);
-
-        if (!this.draggingItem) return;
-
-        const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
-        const tile = this.grid.snap(iso.x, iso.y);
-
-        const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
-        window.placementpreview.update(tile.x, tile.y, valid);
-    }
-
-    // ---------------------------------------------------------
-    // POINTER UP (DROP ITEM)
-    // ---------------------------------------------------------
-    onPointerUp(e) {
-        this.updateMouse(e);
-
-        if (!this.draggingItem) return;
-
-        const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
-        const tile = this.grid.snap(iso.x, iso.y);
-
-        const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
-
-        if (valid) {
-            this.grid.saveState();
-            this.grid.place(tile.x, tile.y, this.draggingItem);
-            window.animation.spawnDust(tile.x, tile.y);
-        }
-
-        this.draggingItem = null;
-        window.placementpreview.clear();
-    }
-
-    // ---------------------------------------------------------
-    // DELETE
-    // ---------------------------------------------------------
-    deleteAtMouse() {
-        const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
-        const tile = this.grid.snap(iso.x, iso.y);
-
-        this.grid.saveState();
-        this.grid.removeTopItem(tile.x, tile.y);
-        window.animation.spawnDust(tile.x, tile.y);
-    }
-
-    onRightClick(e) {
-        e.preventDefault();
-        if (!this.deleteMode) return;
-
-        const iso = this.camera.screenToIso(e.clientX, e.clientY);
-        const tile = this.grid.snap(iso.x, iso.y);
-
-        this.grid.saveState();
-        this.grid.removeTopItem(tile.x, tile.y);
-        window.animation.spawnDust(tile.x, tile.y);
-
-        window.placementpreview.clear();
-        this.draggingItem = null;
-    }
-
-    // ---------------------------------------------------------
-    // ROTATION
-    // ---------------------------------------------------------
-    rotateItem() {
+    rotateCurrentItem() {
         if (!this.draggingItem) return;
         this.draggingItem.rotation = (this.draggingItem.rotation + 90) % 360;
     }
 
-    onWheel(e) {
-        if (!this.draggingItem) return;
-
-        const delta = e.deltaY > 0 ? 90 : -90;
-        this.draggingItem.rotation = (this.draggingItem.rotation + delta + 360) % 360;
-    }
-
-    onKeyDown(e) {
-        if (this.draggingItem && (e.key === "r" || e.key === "R")) {
-            this.rotateItem();
-        }
-
-        if (e.ctrlKey && e.key === "z") this.grid.undo();
-        if (e.ctrlKey && e.key === "y") this.grid.redo();
+    // ---------------------------------------------------------
+    // DELETE MODE
+    // ---------------------------------------------------------
+    toggleDeleteMode() {
+        this.deleteMode = !this.deleteMode;
     }
 
     // ---------------------------------------------------------
-    // MOUSE POSITION
+    // INTERIOR MODE (placeholder)
     // ---------------------------------------------------------
-    updateMouse(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        this.mouse.x = e.clientX - rect.left;
-        this.mouse.y = e.clientY - rect.top;
+    toggleInteriorMode() {
+        this.interiorMode = !this.interiorMode;
     }
 }
