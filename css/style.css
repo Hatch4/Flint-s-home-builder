@@ -183,12 +183,13 @@ html, body {
    DRAG GHOST
 --------------------------------------------------------- */
 #drag-ghost {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
-    opacity: 0;
-    transform: translate(-50%, -50%);
-    transition: opacity 0.1s linear;
     z-index: 9999;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.05s linear;
+    touch-action: none;
 }
 
 /* ---------------------------------------------------------
