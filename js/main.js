@@ -1,5 +1,7 @@
 // main.js
+
 let canvas, ctx;
+let game = {};
 
 window.onload = () => {
     canvas = document.getElementById("gameCanvas");
@@ -7,54 +9,31 @@ window.onload = () => {
 
     resizeCanvas();
 
-    // ---------------------------------------------------------
-    // CORE GAME OBJECTS
-    // ---------------------------------------------------------
-    window.grid = new Grid(5, 4);
-    window.camera = new Camera(window.grid, canvas);
-    window.renderer = new Renderer(canvas, window.grid, window.camera);
-    window.input = new Input(canvas, window.grid, window.camera);
+    // Core game objects
+    game.grid = new Grid(5, 4);          // starting footprint
+    game.camera = new Camera(game.grid, canvas);
+    game.renderer = new Renderer(canvas, game.grid, game.camera);
+    game.input = new Input(canvas, game.grid, game.camera);
+    game.items = Items;
+    game.ui = new UI(game);
+    game.save = new Save(game);
+    game.requirements = new Requirements(game);
 
-    // Items are already global via Items.js
-    window.items = window.Items;
+    // Load previous save if available
+    game.save.load();
 
-    // Save system (optional)
-    window.save = new Save(window);
+    // Debug overlay (optional)
+    game.debug = new DebugOverlay(game);
 
-    // Requirements system (optional)
-    window.requirements = new Requirements(window);
-
-    // ---------------------------------------------------------
-    // PLACEMENT RULES (IMPORTANT)
-    // DO NOT USE "new" — PlacementRules.js defines a plain object
-    // ---------------------------------------------------------
-    // PlacementRules.js already did:
-    // window.placementrules = { isValid(...) }
-    // So we do NOT instantiate anything here.
-
-    // ---------------------------------------------------------
-    // LOAD SAVE (if any)
-    // ---------------------------------------------------------
-    if (window.save && window.save.load) {
-        window.save.load();
-    }
-
-    // ---------------------------------------------------------
-    // DEBUG OVERLAY (optional)
-    // ---------------------------------------------------------
-    window.debug = new DebugOverlay(window);
-
-    // ---------------------------------------------------------
-    // START GAME LOOP
-    // ---------------------------------------------------------
+    // Start render loop
     requestAnimationFrame(loop);
 };
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    window.renderer.render();
-    window.debug.draw(ctx);
+    game.renderer.render();
+    game.debug.draw(ctx);
 
     requestAnimationFrame(loop);
 }
