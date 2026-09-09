@@ -1,23 +1,50 @@
-// Animation.js
+// animation.js
 window.animation = {
-    puffs: [],
+    effects: [],
 
+    // ---------------------------------------------------------
+    // SPAWN DUST PUFF AT TILE
+    // ---------------------------------------------------------
     spawnDust(tileX, tileY) {
-        const pos = window.grid.isoToScreen(tileX, tileY, window.camera);
-        this.puffs.push({ x: pos.x, y: pos.y, r: 5, alpha: 0.5 });
+        const pos = window.grid.isoToScreen(tileX, tileY);
+
+        this.effects.push({
+            x: pos.x,
+            y: pos.y,
+            life: 0,
+            maxLife: 18,   // frames
+            size: 40
+        });
     },
 
-    draw(ctx) {
-        this.puffs = this.puffs.filter(p => p.alpha > 0);
+    // ---------------------------------------------------------
+    // DRAW ALL ACTIVE EFFECTS
+    // ---------------------------------------------------------
+    draw(ctx, camera) {
+        if (this.effects.length === 0) return;
 
-        this.puffs.forEach(p => {
-            ctx.fillStyle = `rgba(200,200,200,${p.alpha})`;
+        ctx.save();
+
+        for (let i = this.effects.length - 1; i >= 0; i--) {
+            const fx = this.effects[i];
+
+            // Fade out
+            const alpha = 1 - fx.life / fx.maxLife;
+
+            ctx.globalAlpha = alpha;
+
+            ctx.fillStyle = "rgba(255,255,255,1)";
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.arc(fx.x, fx.y - 20, fx.size * alpha, 0, Math.PI * 2);
             ctx.fill();
 
-            p.r += 0.8;
-            p.alpha -= 0.03;
-        });
+            fx.life++;
+
+            if (fx.life >= fx.maxLife) {
+                this.effects.splice(i, 1);
+            }
+        }
+
+        ctx.restore();
     }
 };
