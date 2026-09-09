@@ -1,8 +1,12 @@
 // placementrules.js
 window.placementrules = {
 
+    init(game) {
+        this.grid = game.grid;
+    },
+
     isValid(tileX, tileY, item) {
-        const cell = window.game.grid.get(tileX, tileY);
+        const cell = this.grid.get(tileX, tileY);
         if (!cell) return false;
 
         switch (item.category) {
