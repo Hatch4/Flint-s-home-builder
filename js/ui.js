@@ -41,11 +41,24 @@ class UI {
     e.preventDefault();
     e.stopImmediatePropagation();
 
-    // ⭐ Only start dragging on an actual left-click
-    if (e.pointerType === "mouse" && e.buttons !== 1) return;
-
-    // ⭐ Prevent accidental re-drag after placement
+    // Prevent accidental re-drag after placement
     if (window.input.draggingItem !== null) return;
+
+    // Touch: ensure the tap is actually inside the button
+    if (e.pointerType === "touch") {
+        const rect = btn.getBoundingClientRect();
+        if (
+            e.clientX < rect.left ||
+            e.clientX > rect.right ||
+            e.clientY < rect.top ||
+            e.clientY > rect.bottom
+        ) {
+            return;
+        }
+    }
+
+    // Mouse: only left-click
+    if (e.pointerType === "mouse" && e.buttons !== 1) return;
 
     window.input.startDraggingItem(item);
     window.placementpreview.clear();
