@@ -10,7 +10,7 @@ window.onload = () => {
     resizeCanvas();
 
     // Core game objects
-    game.grid = new Grid(5, 4);          // starting footprint
+    game.grid = new Grid(5, 4);
     game.camera = new Camera(game.grid, canvas);
     game.renderer = new Renderer(canvas, game.grid, game.camera);
     game.input = new Input(canvas, game.grid, game.camera);
@@ -18,16 +18,15 @@ window.onload = () => {
     game.ui = new UI(game);
     game.save = new Save(game);
     game.requirements = new Requirements(game);
+    game.placement = new Placement(game);   // ⭐ add this
+
+    window.game = game;                     // ⭐ make game global
     window.placementrules.init(game);
     window.placementpreview.init(game);
 
-    // Load previous save if available
     game.save.load();
-
-    // Debug overlay (optional)
     game.debug = new DebugOverlay(game);
 
-    // Start render loop
     requestAnimationFrame(loop);
 };
 
