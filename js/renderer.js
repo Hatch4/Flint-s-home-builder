@@ -6,200 +6,161 @@ class Renderer {
         this.grid = grid;
         this.camera = camera;
 
+        // Tile size (must match camera)
         this.tileW = 96;
         this.tileH = 48;
 
-        this.resize();
-        window.addEventListener("resize", () => this.resize());
-    }
-
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-    }
-
-    clear() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Preload simple colors or images if needed
+        this.colors = {
+            floor: "#c8c8c8",
+            wall: "#8b5a2b",
+            roof: "#b8860b",
+            decor: "#ff66cc",
+            door: "#663300",
+            window: "#99ccff"
+        };
     }
 
     // ---------------------------------------------------------
-    // MAIN RENDER LOOP
+    // MAIN RENDER ENTRY POINT
     // ---------------------------------------------------------
     render() {
-        this.clear();
+        const ctx = this.ctx;
 
-        this.ctx.save();
+        ctx.save();
 
-        // Apply camera transform ONCE
-        this.ctx.translate(this.camera.x, this.camera.y);
-        this.ctx.scale(this.camera.zoom, this.camera.zoom);
+        // Apply camera transform once
+        ctx.translate(this.camera.x, this.camera.y);
+        ctx.scale(this.camera.zoom, this.camera.zoom);
 
-        this.drawGrid();
-        this.drawTiles();
-
-        if (window.placementpreview) {
-            window.placementpreview.draw(this.ctx, this.camera);
-        }
-
-        if (window.animation) {
-            window.animation.draw(this.ctx, this.camera);
-        }
-
-        this.drawGhost();
-        this.drawDeletePreview();
-        this.drawSelection();
-
-        this.ctx.restore();
-    }
-
-    // ---------------------------------------------------------
-    // DRAW GRID (debug)
-    // ---------------------------------------------------------
-    drawGrid() {
-        this.ctx.save();
-        this.ctx.strokeStyle = "rgba(0, 255, 0, 0.25)";
-        this.ctx.lineWidth = 1;
-        this.ctx.font = "12px Arial";
-        this.ctx.fillStyle = "rgba(255,255,255,0.6)";
-
+        // Draw tiles in correct isometric order
         for (let y = 0; y < this.grid.height; y++) {
             for (let x = 0; x < this.grid.width; x++) {
+                const tile = this.grid.tiles[y][x];
                 const pos = this.grid.isoToScreen(x, y);
 
-                const w = this.tileW / 2;
-                const h = this.tileH / 2;
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
 
-                this.ctx.beginPath();
-                this.ctx.moveTo(pos.x, pos.y - h);
-                this.ctx.lineTo(pos.x + w, pos.y);
-                this.ctx.lineTo(pos.x, pos.y + h);
-                this.ctx.lineTo(pos.x - w, pos.y);
-                this.ctx.closePath();
-                this.ctx.stroke();
+                this.drawFloor(tile);
+                this.drawWall(tile);
+                this.drawDoor(tile);
+                this.drawWindow(tile);
+                this.drawRoof(tile);
+                this.drawDecor(tile);
 
-                this.ctx.fillText(`${x},${y}`, pos.x - 12, pos.y + 4);
+                ctx.restore();
             }
         }
 
-        this.ctx.restore();
+        ctx.restore();
+
+        // Draw placement preview (screen space)
+        window.placementpreview.draw(ctx, this.camera);
+
+        // Draw animations (screen space)
+        window.animation.draw(ctx, this.camera);
     }
 
     // ---------------------------------------------------------
-    // DRAW ALL TILE STACKS
+    // DRAW FLOOR
     // ---------------------------------------------------------
-    drawTiles() {
-        for (let y = 0; y < this.grid.height; y++) {
-            for (let x = 0; x < this.grid.width; x++) {
-                const cell = this.grid.tiles[y][x];
-                this.drawTileStack(x, y, cell);
-            }
-        }
-    }
-
-    drawTileStack(x, y, cell) {
-        const pos = this.grid.isoToScreen(x, y);
-
-        const drawItem = (item) => {
-            if (!item) return;
-            const img = window.assets[item.icon];
-            if (!img) return;
-
-            this.ctx.save();
-            this.ctx.translate(pos.x, pos.y);
-            this.ctx.rotate((item.rotation || 0) * Math.PI / 180);
-            this.ctx.drawImage(img, -img.width / 2, -img.height / 2);
-            this.ctx.restore();
-        };
-
-        // Correct draw order
-        drawItem(cell.floor);
-        drawItem(cell.wall);
-        drawItem(cell.roof);
-
-        cell.decor.forEach(drawItem);
-
-        drawItem(cell.door);
-        drawItem(cell.window);
-    }
-
-    // ---------------------------------------------------------
-    // DRAG GHOST
-    // ---------------------------------------------------------
-    drawGhost() {
-        if (!window.input || !window.input.draggingItem) return;
-
-        const draggingItem = window.input.draggingItem;
-        const mouse = window.input.mouse;
-
-        const iso = this.camera.screenToIso(mouse.x, mouse.y);
-        const tile = this.grid.snap(iso.x, iso.y);
-        const pos = this.grid.isoToScreen(tile.x, tile.y);
-
-        const img = window.assets[draggingItem.icon];
-        if (!img) return;
-
-        this.ctx.save();
-        this.ctx.translate(pos.x, pos.y);
-        this.ctx.rotate((draggingItem.rotation || 0) * Math.PI / 180);
-        this.ctx.globalAlpha = 0.6;
-        this.ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        this.ctx.restore();
-    }
-
-    // ---------------------------------------------------------
-    // DELETE PREVIEW
-    // ---------------------------------------------------------
-    drawDeletePreview() {
-        if (!window.input || !window.input.deleteMode) return;
-
-        const mouse = window.input.mouse;
-        const iso = this.camera.screenToIso(mouse.x, mouse.y);
-        const tile = this.grid.snap(iso.x, iso.y);
-
-        const pos = this.grid.isoToScreen(tile.x, tile.y);
+    drawFloor(tile) {
+        if (!tile.floor) return;
 
         const w = this.tileW / 2;
         const h = this.tileH / 2;
 
-        this.ctx.save();
-        this.ctx.strokeStyle = "rgba(255, 0, 0, 0.9)";
-        this.ctx.lineWidth = 3;
-
+        this.ctx.fillStyle = this.colors.floor;
         this.ctx.beginPath();
-        this.ctx.moveTo(pos.x, pos.y - h);
-        this.ctx.lineTo(pos.x + w, pos.y);
-        this.ctx.lineTo(pos.x, pos.y + h);
-        this.ctx.lineTo(pos.x - w, pos.y);
+        this.ctx.moveTo(0, -h);
+        this.ctx.lineTo(w, 0);
+        this.ctx.lineTo(0, h);
+        this.ctx.lineTo(-w, 0);
         this.ctx.closePath();
-        this.ctx.stroke();
-
-        this.ctx.restore();
+        this.ctx.fill();
     }
 
     // ---------------------------------------------------------
-    // SELECTION OUTLINE
+    // DRAW WALL
     // ---------------------------------------------------------
-    drawSelection() {
-        if (!this.grid.selectedTile) return;
+    drawWall(tile) {
+        if (!tile.wall || tile.wall.type !== "wall") return;
 
-        const { x, y } = this.grid.selectedTile;
-        const pos = this.grid.isoToScreen(x, y);
+        this.drawWallShape(this.colors.wall);
+    }
 
+    // ---------------------------------------------------------
+    // DRAW DOOR
+    // ---------------------------------------------------------
+    drawDoor(tile) {
+        if (!tile.wall || tile.wall.type !== "door") return;
+
+        this.drawWallShape(this.colors.door);
+    }
+
+    // ---------------------------------------------------------
+    // DRAW WINDOW
+    // ---------------------------------------------------------
+    drawWindow(tile) {
+        if (!tile.wall || tile.wall.type !== "window") return;
+
+        this.drawWallShape(this.colors.window);
+    }
+
+    // ---------------------------------------------------------
+    // WALL SHAPE (shared by wall/door/window)
+    // ---------------------------------------------------------
+    drawWallShape(color) {
+        const ctx = this.ctx;
         const w = this.tileW / 2;
         const h = this.tileH / 2;
 
-        this.ctx.save();
-        this.ctx.strokeStyle = "#ff0000";
-        this.ctx.lineWidth = 2;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(-w, 0);
+        ctx.lineTo(-w, -40);
+        ctx.lineTo(w, -40);
+        ctx.lineTo(w, 0);
+        ctx.closePath();
+        ctx.fill();
+    }
 
-        this.ctx.beginPath();
-        this.ctx.moveTo(pos.x, pos.y - h);
-        this.ctx.lineTo(pos.x + w, pos.y);
-        this.ctx.lineTo(pos.x, pos.y + h);
-        this.ctx.lineTo(pos.x - w, pos.y);
-        this.ctx.closePath();
-        this.ctx.stroke();
+    // ---------------------------------------------------------
+    // DRAW ROOF
+    // ---------------------------------------------------------
+    drawRoof(tile) {
+        if (!tile.roof) return;
 
-        this.ctx.restore();
+        const ctx = this.ctx;
+        const w = this.tileW / 2;
+        const h = this.tileH / 2;
+
+        ctx.fillStyle = this.colors.roof;
+        ctx.beginPath();
+        ctx.moveTo(0, -h - 40);
+        ctx.lineTo(w, -40);
+        ctx.lineTo(0, h - 40);
+        ctx.lineTo(-w, -40);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // ---------------------------------------------------------
+    // DRAW DECOR
+    // ---------------------------------------------------------
+    drawDecor(tile) {
+        if (!tile.decor || tile.decor.length === 0) return;
+
+        const ctx = this.ctx;
+
+        for (const d of tile.decor) {
+            ctx.fillStyle = this.colors.decor;
+            ctx.beginPath();
+            ctx.arc(0, -20, 12, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 }
+
+window.Renderer = Renderer;
