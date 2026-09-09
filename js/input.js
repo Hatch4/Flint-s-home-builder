@@ -42,21 +42,21 @@ class Input {
         });
 
         this.canvas.addEventListener("pointerup", () => {
-            if (!this.draggingItem) return;
+    if (!this.draggingItem) return;
 
-            const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
-            const tile = this.grid.snap(iso.x, iso.y);
+    const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+    const tile = this.grid.snap(iso.x, iso.y);
 
-            const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+    const success = window.game.placement.attempt(tile.x, tile.y, this.draggingItem);
 
-            if (valid) {
-                this.grid.place(tile.x, tile.y, this.draggingItem);
-                window.animation.spawnDust(tile.x, tile.y);
-            }
+    if (success) {
+        // placement.js already spawns dust + updates requirements
+    }
 
-            this.draggingItem = null;
-            window.placementpreview.clear();
-        });
+    this.draggingItem = null;
+    window.placementpreview.clear();
+});
+
 
         /* -----------------------------
            KEYBOARD
@@ -119,30 +119,27 @@ class Input {
         });
 
         this.canvas.addEventListener("touchend", () => {
-            if (!this.draggingItem) return;
+    if (!this.draggingItem) return;
 
-            const duration = Date.now() - this.touchStartTime;
+    const duration = Date.now() - this.touchStartTime;
 
-            // Long press = rotate
-            if (duration > 400) {
-                this.rotateCurrentItem();
-                return;
-            }
+    if (duration > 400) {
+        this.rotateCurrentItem();
+        return;
+    }
 
-            // Drop item
-            const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
-            const tile = this.grid.snap(iso.x, iso.y);
+    const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
+    const tile = this.grid.snap(iso.x, iso.y);
 
-            const valid = window.placementrules.isValid(tile.x, tile.y, this.draggingItem);
+    const success = window.game.placement.attempt(tile.x, tile.y, this.draggingItem);
 
-            if (valid) {
-                this.grid.place(tile.x, tile.y, this.draggingItem);
-                window.animation.spawnDust(tile.x, tile.y);
-            }
+    if (success) {
+        // placement.js already handles dust + requirements
+    }
 
-            this.draggingItem = null;
-            window.placementpreview.clear();
-        });
+    this.draggingItem = null;
+    window.placementpreview.clear();
+});
     }
 
     // ---------------------------------------------------------
