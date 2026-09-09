@@ -39,7 +39,7 @@ class UI {
 
            btn.addEventListener("pointerdown", (e) => {
     e.preventDefault();
-    e.stopImmediatePropagation();
+    e.stopImmediatePropagation();   // ⭐ blocks capture + bubble
 
     // ⭐ Prevent accidental re-drag after placement
     if (window.input.draggingItem !== null) return;
