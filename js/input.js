@@ -37,7 +37,7 @@ class Input {
     const iso = this.camera.screenToIso(this.mouse.x, this.mouse.y);
     const tile = this.grid.snap(iso.x, iso.y);
 
-    const success = window.game.placement.attemptPlace(tile.x, tile.y, this.draggingItem);
+    const success = window.game.placement.attempt(tile.x, tile.y, this.draggingItem);
 
     this.draggingItem = null;
     window.placementpreview.clear();
