@@ -31,13 +31,6 @@ class Input {
             window.placementpreview.update(tile.x, tile.y, valid);
         });
 
-        this.canvas.addEventListener("pointerdown", (e) => {
-            if (!this.draggingItem) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-            }
-        });
-
         this.canvas.addEventListener("pointerup", () => {
     if (!this.draggingItem) return;
 
