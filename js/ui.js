@@ -2,21 +2,23 @@ class UI {
     constructor(game) {
         this.game = game;
 
-        this.tray = document.getElementById("tray");
-        this.deleteBtn = document.getElementById("deleteBtn");
-        this.interiorBtn = document.getElementById("interiorBtn");
+        // match HTML IDs
+        this.tray = document.getElementById("itemTray");
+        this.deleteBtn = document.getElementById("delete-btn");
+        this.interiorBtn = document.getElementById("interior-btn");
 
-        this.dragGhost = document.createElement("div");
+        // use existing drag-ghost div from HTML
+        this.dragGhost = document.getElementById("drag-ghost");
         this.dragGhost.style.position = "fixed";
         this.dragGhost.style.pointerEvents = "none";
         this.dragGhost.style.opacity = 0;
         this.dragGhost.style.zIndex = 9999;
-        document.body.appendChild(this.dragGhost);
 
         this.buildTray();
         this.bindButtons();
         this.bindGhost();
     }
+}
 
     // ---------------------------------------------------------
     // BUILD TRAY
