@@ -41,8 +41,10 @@ class Requirements {
 
                 if (tile.roof) roof++;
 
-                if (tile.decor && tile.decor.type === "lantern") {
-                    lantern++;
+                if (tile.decor && tile.decor.length > 0) {
+                    for (const d of tile.decor) {
+                        if (d.type === "lantern") lantern++;
+                    }
                 }
             }
         }
@@ -69,13 +71,6 @@ class Requirements {
 
         return Math.floor((totalMet / totalRequired) * 100);
     }
-    // ---------------------------------------------------------
-    // Get current progress percentage
-    // ---------------------------------------------------------
-    getPercent() {
-        const counts = this.countPieces();
-        return this.calculateProgress(counts);
-    }
 
     // ---------------------------------------------------------
     // Update progress + check for completion
@@ -85,7 +80,8 @@ class Requirements {
         const percent = this.calculateProgress(counts);
 
         // Update UI
-        this.game.ui.updateProgress(percent);
+        const indicator = document.getElementById("progress-indicator");
+        indicator.textContent = percent + "%";
 
         // Auto-save
         this.game.save.autoSave();
@@ -98,7 +94,7 @@ class Requirements {
     }
 
     // ---------------------------------------------------------
-    // Ending Animation A (simple fade-in Tentacle Bill + glow)
+    // Ending Animation A (simple glow + fade-in Tentacle Bill)
     // ---------------------------------------------------------
     triggerEndingAnimation() {
         console.log("Ending animation triggered!");
@@ -106,7 +102,6 @@ class Requirements {
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Glow overlay
         let glowAlpha = 0;
 
         const glowInterval = setInterval(() => {
@@ -171,3 +166,5 @@ class Requirements {
         ctx.fillText("Your friendship brought him home.", canvas.width / 2, canvas.height / 2 + 30);
     }
 }
+
+window.Requirements = Requirements;
