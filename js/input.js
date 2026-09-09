@@ -41,6 +41,13 @@ class Input {
             window.placementpreview.update(tile.x, tile.y, valid);
         });
 
+        this.canvas.addEventListener("pointerdown", (e) => {
+    // Prevent canvas clicks from starting a new drag
+    if (!this.draggingItem) {
+        return;
+    }
+});
+
         this.canvas.addEventListener("pointerup", () => {
     if (!this.draggingItem) return;
 
